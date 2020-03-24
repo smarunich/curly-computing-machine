@@ -4,7 +4,6 @@ data "vsphere_virtual_machine" "controller_template" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-
 resource "vsphere_virtual_machine" "controller" {
   count            = var.pod_count
   name             = "${var.id}_podt${count.index + 1}_controller"
@@ -15,6 +14,8 @@ resource "vsphere_virtual_machine" "controller" {
     network_id = data.vsphere_network.network.id
   }
 
+  num_cpus = var.cpu
+  memory = var.mem
   guest_id = data.vsphere_virtual_machine.controller_template.guest_id
   scsi_type = data.vsphere_virtual_machine.controller_template.scsi_type
   scsi_bus_sharing = data.vsphere_virtual_machine.controller_template.scsi_bus_sharing
@@ -29,5 +30,13 @@ resource "vsphere_virtual_machine" "controller" {
 
   clone {
     template_uuid = data.vsphere_virtual_machine.controller_template.id
+  }
+
+  vapp {
+    properties = {
+      "mgmt-ip"                        = var.mgmt_ip
+      "mgmt-mask"                = var.mgmt_mask      
+      "default-gw"        = var.default_gw   
+    }
   }
 }
