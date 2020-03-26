@@ -9,7 +9,7 @@ variable "pod_count" {
 }
 
 variable "controller_template" {
-  default     = "controller-18.2.6-9134"
+  default     = "controller-18.2.6-9134-template"
 }
 
 #Controller CPUs
