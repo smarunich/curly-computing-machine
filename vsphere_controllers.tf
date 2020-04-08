@@ -41,9 +41,9 @@ resource "vsphere_virtual_machine" "controller" {
   scsi_controller_count = data.vsphere_virtual_machine.controller_template.scsi_controller_scan_count
 
   disk {
-    label           = "${var.id}_controller.pod${count.index + 1}.${var.id}.lab_vmdk"
+    size             = var.controller["disk"]
+    label            = "${var.id}_controller.pod${count.index + 1}.${var.id}.lab_vmdk"
     eagerly_scrub    = data.vsphere_virtual_machine.controller_template.disks.0.eagerly_scrub
-    size             = data.vsphere_virtual_machine.controller_template.disks.0.size
     thin_provisioned = data.vsphere_virtual_machine.controller_template.disks.0.thin_provisioned
   }
 

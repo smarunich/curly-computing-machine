@@ -28,4 +28,7 @@ fabric.properties
 .idea/httpRequests
 keys/
 .terraform/
+terraform.tfstate
+terraform.tfstate*
 terraform.tfvars
+*.retry

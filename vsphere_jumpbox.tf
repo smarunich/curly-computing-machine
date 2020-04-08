@@ -66,9 +66,9 @@ resource "vsphere_virtual_machine" "jumpbox" {
   scsi_controller_count = data.vsphere_virtual_machine.jumpbox_template.scsi_controller_scan_count
 
   disk {
-    label           = "${var.id}_jumpbox.pod.lab_vmdk"
+    size             = var.jumpbox["disk"]
+    label            = "${var.id}_jumpbox.pod.lab_vmdk"
     eagerly_scrub    = data.vsphere_virtual_machine.jumpbox_template.disks.0.eagerly_scrub
-    size             = data.vsphere_virtual_machine.jumpbox_template.disks.0.size
     thin_provisioned = data.vsphere_virtual_machine.jumpbox_template.disks.0.thin_provisioned
   }
 
@@ -118,7 +118,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
     ]
   }
 
-  provisioner "local-exec"{
+  provisioner "local-exec" {
     command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${vsphere_virtual_machine.jumpbox.default_ip_address},' --private-key ${local.private_key_filename} -e'private_key_filename=${local.private_key_filename}' --user ubuntu provisioning/provision_jumpbox.yml"
   }
 

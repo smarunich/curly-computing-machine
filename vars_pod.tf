@@ -18,6 +18,7 @@ variable "controller" {
   default = {
     cpu = 8
     memory = 24768
+    disk = 128
     template = "controller-18.2.6-9134-template"
   # mgmt_ip = ""
   # mgmt_mask = ""
@@ -30,12 +31,27 @@ variable "jumpbox" {
   default = {
     cpu = 2
     memory = 4096
+    disk = 20
     template = "ubuntu-18.04-server-template"
   # mgmt_ip = ""
   # mgmt_mask = ""
   # default_gw = ""
   }
 }
+
+variable "server" {
+  type = map
+  default = {
+    cpu = 4
+    memory = 8192
+    disk = 60
+    template = "ubuntu-18.04-server-template"
+  # mgmt_ip = ""
+  # mgmt_mask = ""
+  # default_gw = ""
+  }
+}
+
 
 variable "avi_default_password" {
 }
