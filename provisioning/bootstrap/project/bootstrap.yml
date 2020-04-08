@@ -1,0 +1,25 @@
+---
+- hosts: controllers
+  vars:
+    avi_creds:
+      controller: "{{ inventory_hostname }}"
+      username: admin
+      password: "{{ hostvars['jumpbox.pod.lab']['Lab_avi_default_password'] }}"
+
+  roles:
+    - controllers
+
+- hosts: servers
+  become: yes
+  roles:
+  - servers
+
+- hosts: jumpbox
+  become: yes
+  roles:
+  - jumpbox
+
+- hosts: k8s_masters
+  become: yes
+  roles:
+  - k8s_masters

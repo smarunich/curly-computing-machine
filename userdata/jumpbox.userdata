@@ -1,0 +1,40 @@
+#cloud-config
+users:
+  - default
+  - name: aviadmin
+    lock_passwd: true
+    shell: /bin/bash
+    sudo:  ALL=(ALL) NOPASSWD:ALL
+    chpasswd: {expire: False}
+    ssh_authorized_keys:
+      - ${pubkey}
+
+chpasswd:
+  list: |
+    ubuntu: $password
+    aviadmin: $password
+  expire: False
+
+packages:
+  - language-pack-en
+
+write_files:
+  - content: |
+      #!/bin/sh
+      host_name=`echo ${hostname} | cut -d. -f1`
+      domain_name=`echo ${hostname} | cut -d. -f2,3`
+      hostnamectl set-hostname --static ${hostname}
+      echo 'preserve_hostname: true' >> /etc/cloud/cloud.cfg
+      interface=`ip route show | grep default | awk '{print $5}'`
+      ip=`ip address show dev $interface | grep 'inet ' | awk '{print $2}' | cut -d/ -f1`
+      echo "$ip ${hostname}" >> /etc/hosts
+      touch /tmp/cloud-init.done
+    path: /opt/bootstrap.sh
+    permissions: 0755
+
+  - content: |
+      ubuntu ALL=(ALL) NOPASSWD:ALL
+    path: /etc/sudoers.d/ubuntu
+
+runcmd:
+  - /opt/bootstrap.sh

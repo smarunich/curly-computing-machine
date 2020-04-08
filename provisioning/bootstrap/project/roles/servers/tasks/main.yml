@@ -1,0 +1,67 @@
+---
+- file:
+    path: /etc/resolv.conf
+    state: absent
+- template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+- set_fact:
+    k8s_master: "{{ inventory_hostname | regex_replace('server(\\d+)','master1') }}"
+- wait_for:
+    host: "{{ k8s_master }}"
+    port: 6443
+    delay: 10
+- shell: kubeadm config view
+  register: kubeadm_config
+  ignore_errors: yes
+  changed_when: "kubeadm_config.rc != 0"
+- block:
+  - apt_key:
+      url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+      id: "0x6A030B21BA07F4FB"
+  - apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+  - apt:
+      name:
+        - docker.io
+        - kubelet
+        - kubeadm
+        - kubectl
+  - copy:
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+  - file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+  - systemd:
+      name: docker
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
+  - user:
+      name: aviadmin
+      groups: docker
+  - shell: curl http://169.254.169.254/latest/meta-data/local-hostname
+    register: aws_hostname
+  - debug:
+      var: aws_hostname.stdout
+  - debug:
+      var: ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])
+  - hostname:
+      name: "{{ aws_hostname.stdout }}"
+  - service:
+      name: kubelet
+      state: started
+      enabled: true
+  - meta: refresh_inventory
+  #- shell: "kubeadm join --token {{ hostvars[k8s_master].kubeadm_token }} {{ k8s_master }}:6443 --discovery-token-ca-cert-hash sha256:{{ hostvars[k8s_master].kubeadm_hash }}"
+  #  register: kubeadm_join
+  - template:
+      src: kubeadm.j2
+      dest: /home/ubuntu/kubeadm.yaml
+  - shell: kubeadm join --config=/home/ubuntu/kubeadm.yaml
+    register: kubeadm_join
+  - shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf label node {{ awslocalhostname }} lab_name={{ inventory_hostname }}"
+    delegate_to: "{{ k8s_master }}"
+  when: kubeadm_config.rc > 0

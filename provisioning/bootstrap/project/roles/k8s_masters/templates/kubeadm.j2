@@ -1,0 +1,21 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+apiServer:
+  extraArgs:
+    cloud-provider: aws
+clusterName: {{ inventory_hostname | regex_replace('master1.','') | regex_replace('.lab','') }}
+controlPlaneEndpoint: {{ inventory_hostname }}
+controllerManager:
+  extraArgs:
+    cloud-provider: aws
+    configure-cloud-routes: "false"
+kubernetesVersion: stable
+networking:
+  podSubnet: 10.244.0.0/16
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+nodeRegistration:
+  kubeletExtraArgs:
+    cloud-provider: aws

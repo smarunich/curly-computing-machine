@@ -1,0 +1,184 @@
+---
+- copy:
+    src: /home/ubuntu/.ssh/id_rsa
+    dest: /home/aviadmin/.ssh/id_rsa
+    owner: aviadmin
+    group: aviadmin
+    mode: '0600'
+- file:
+    path: /etc/resolv.conf
+    state: absent
+- template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+- shell: kubeadm config view
+  register: kubeadm_config
+  ignore_errors: yes
+  changed_when: "kubeadm_config.rc != 0"
+- block:
+  - apt_key:
+      url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+      id: "0x6A030B21BA07F4FB"
+  - apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+  - apt:
+      name:
+        - docker.io
+        - kubelet
+        - kubeadm
+        - kubectl
+        - redis-tools
+        - jq
+        - awscli
+        - httpie
+        - httping
+  - get_url:
+      url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/cfssl
+      dest: /usr/local/bin/cfssl
+      mode: '0777'
+  - get_url:
+      url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/cfssljson
+      dest: /usr/local/bin/cfssljson
+      mode: '0777'
+  - file:
+      path: /etc/cfssl
+      state: directory
+  - copy:
+      src: "{{ item }}"
+      dest: "/etc/cfssl/{{ item }}"
+      owner: root
+      group: root
+      mode: '0644'
+    with_items:
+      - ca-config.json
+      - ca-csr.json
+  - shell:
+      chdir: /etc/cfssl
+      cmd: cfssl gencert -initca -config /etc/cfssl/ca-config.json ca-csr.json | cfssljson -bare ca
+      creates: /etc/cfssl/ca.pem
+  - file:
+      path: /etc/cfssl/ca-key.pem
+      owner: root
+      group: root
+      mode: '0644'
+  - copy:
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+  - file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+  - systemd:
+      name: docker
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
+  - user:
+      name: aviadmin
+      groups: docker
+  - uri:
+      url: "http://169.254.169.254/latest/meta-data/local-hostname"
+      return_content: yes
+    register: aws_hostname
+  - debug:
+      var: aws_hostname.content
+  - debug:
+      var: ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])
+  - hostname:
+      name: "{{ aws_hostname.content }}"
+  - service:
+      name: kubelet
+      state: started
+      enabled: true
+  - template:
+      src: kubeadm.j2
+      dest: /home/ubuntu/kubeadm.yaml
+  - shell: kubeadm init --config=/home/ubuntu/kubeadm.yaml
+    register: kubeadm_init
+  - file:
+      path: "/home/{{ item }}/.kube"
+      state: directory
+    loop:
+      - ubuntu
+      - aviadmin
+  - copy:
+      remote_src: yes
+      src: /etc/kubernetes/admin.conf
+      dest: "/home/{{ item }}/.kube/config"
+      owner: "{{ item }}"
+      group: "{{ item }}"
+    loop:
+      - ubuntu
+      - aviadmin
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.6/aws-k8s-cni.yaml
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+    register: kubeadm_network
+  - shell: kubeadm token list | grep authentication | cut -d' ' -f1
+    register: kubeadm_token
+  - shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+    register: kubeadm_hash
+  - shell: "redis-cli -h jumpbox.pod.lab hset {{ inventory_hostname }} kubeadm_token {{ kubeadm_token.stdout }}"
+    register: redis_kubeadm_token
+  - shell: "redis-cli -h jumpbox.pod.lab hset {{ inventory_hostname }} kubeadm_hash {{ kubeadm_hash.stdout }}"
+    register: redis_kubeadm_hash
+  - shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf label node {{ awslocalhostname }} lab_name={{ inventory_hostname }}"
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/as679/studious-guide/master/dashboardserviceaccount.yml
+  when: kubeadm_config.rc > 0
+- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf get serviceaccount | grep avi
+  register: kubectl_serviceaccount
+  ignore_errors: yes
+  changed_when: "kubectl_serviceaccount.rc != 0"
+#- block:
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create serviceaccount avi -n default
+  #- copy:
+  #    src: clusterrole.json
+  #    dest: /home/aviadmin/clusterrole.json
+  #- copy:
+  #    src: clusterbinding.json
+  #    dest: /home/aviadmin/clusterbinding.json
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/aviadmin/clusterrole.json
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/aviadmin/clusterbinding.json
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf get secret | grep avi-token | cut -d' ' -f1
+  #  register: avi_token_name
+  #- shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf get secret {{ avi_token_name.stdout }} -o=jsonpath='{.data.token}' |  base64 --decode"
+  #  register: avi_token
+  #- shell: "redis-cli -h jumpbox.pod.lab hset {{ inventory_hostname }} avi_token {{ avi_token.stdout }}"
+  #  register: redis_avi_token
+  #when: kubectl_serviceaccount.rc > 0
+
+- shell: helm
+  register: helm_state
+  ignore_errors: yes
+  changed_when: "helm_state.rc != 0"
+
+- block:
+  - uri:
+      url: "http://169.254.169.254/latest/meta-data/network/interfaces/macs/{{ ansible_default_ipv4.macaddress }}/subnet-id"
+      return_content: yes
+    register: subnet_id
+  - shell: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+  - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add stable https://kubernetes-charts.storage.googleapis.com/
+  - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo update
+
+  - template:
+      src: kuard.j2
+      dest: /home/ubuntu/kuard.yaml
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/kuard.yaml
+
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc5/aio/deploy/recommended.yaml
+  - template:
+      src: kubernetes-dashboard-ingress.j2
+      dest: /home/ubuntu/kubernetes-dashboard-ingress.yaml
+  - copy:
+      src: "{{ item }}"
+      dest: "/home/ubuntu/{{ item }}"
+    loop:
+      - kubernetes-dashboard-ro.yaml
+      - kubernetes-dashboard-rw.yaml
+  # Remove default kubernetes dashboard roles and bindings
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf delete clusterrolebinding kubernetes-dashboard
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf delete clusterrole kubernetes-dashboard
+  - shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/kubernetes-dashboard-rw.yaml
+
+  #- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/kubernetes-dashboard-ingress.yaml -n kubernetes-dashboard
+  when: helm_state.rc > 0
