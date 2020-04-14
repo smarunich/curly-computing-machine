@@ -32,7 +32,7 @@ variable "jumpbox" {
     cpu = 2
     memory = 4096
     disk = 20
-    template = "ubuntu-18.04-server-template"
+    template = "ubuntu-bionic-18.04-cloudimg-20200407"
   # mgmt_ip = ""
   # mgmt_mask = ""
   # default_gw = ""
@@ -45,7 +45,7 @@ variable "server" {
     cpu = 4
     memory = 8192
     disk = 60
-    template = "ubuntu-18.04-server-template"
+    template = "ubuntu-bionic-18.04-cloudimg-20200407"
   # mgmt_ip = ""
   # mgmt_mask = ""
   # default_gw = ""

@@ -116,10 +116,6 @@
       - { regexp: '^#(no-resolv)$', replace: '\1' }
       - { regexp: '^#(server)=/localnet/192.168.0.1$', replace: '\1=8.8.8.8' }
       - { regexp: '^#(local)=/localnet/$', replace: '\1=/lab/' }
-  - lineinfile:
-      dest: /etc/dnsmasq.conf
-      insertafter: EOF
-      line: server=/compute.internal/{{ ansible_default_ipv4.address  |  ipsubnet('24') | ipaddr('2')  | ipaddr('address') }}
   - systemd:
       state: restarted
       name: dnsmasq
@@ -142,5 +138,5 @@
       src: ../provisioning/register.py
       dest: /var/www/html/register.py
       mode: 0755
-  - shell: /usr/local/bin/register.py 127.0.0.1
+  - shell: "/usr/local/bin/register.py 127.0.0.1 {{ vcenter_host }} {{ vcenter_user }} {{ vcenter_password }} {{ vm_name }}"
     register: register

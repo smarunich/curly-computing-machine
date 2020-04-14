@@ -119,7 +119,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${vsphere_virtual_machine.jumpbox.default_ip_address},' --private-key ${local.private_key_filename} -e'private_key_filename=${local.private_key_filename}' --user ubuntu provisioning/provision_jumpbox.yml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${vsphere_virtual_machine.jumpbox.default_ip_address},' --private-key ${local.private_key_filename} -e'private_key_filename=${local.private_key_filename} vcenter_host=${var.vsphere_server} vcenter_user=${var.vsphere_user} vcenter_password=${var.vsphere_password}' vm_name=${var.id}_jumpbox.pod.lab --user ubuntu provisioning/provision_jumpbox.yml"
   }
 
 }
