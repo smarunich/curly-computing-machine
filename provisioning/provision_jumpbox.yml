@@ -21,6 +21,7 @@
         - avisdk
         - boto3
         - ansible-runner
+        - pyvmomi
       extra_args: --upgrade
   - shell: ansible-galaxy install avinetworks.avisdk avinetworks.aviconfig
     become_user: ubuntu
