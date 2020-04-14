@@ -37,7 +37,6 @@ def get_vm_metadata(si, vm_name):
     vm_id = get_vm_id_by_name(si, vm_name)
     obj = VmomiSupport.templateOf("VirtualMachine")(vm_id, si._stub)
     obj_metadata = json.loads(json.dumps(obj, cls=VmomiSupport.VmomiJSONEncoder))
-    print(obj.tag)
     return obj_metadata['guest']
 
 blocker_fname = "/opt/register_blocker"
