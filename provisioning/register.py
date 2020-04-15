@@ -56,6 +56,11 @@ if not exists:
     identity['vmId'] = vm_id
     identity['now'] = datetime.datetime.now().isoformat()
     identity['localhostname'] = os.uname()[1]
+    identity['network'] = identity['net'][0]['network']
+    identity.pop('net')
+    identity.pop('ipStack')
+    identity.pop('disk')
+    identity.pop('screen')
     # Serialize the tags
     vcenter_url = "https://" + vcenter_host + "/rest"
     vcenter_url_auth = vcenter_url + "/com/vmware/cis/session"

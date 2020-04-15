@@ -66,7 +66,7 @@ class hosts_file(object):
 class update_redis(object):
     def __init__(self, redis_session, id):
         self.redis_session = redis_session
-        self.identity = id
+        self.identity = identity(id)
         self.redis_instances()
 
     def redis_instances(self):
@@ -89,4 +89,5 @@ if __name__ == '__main__':
             data = json.loads(m['data'].decode('utf-8'))
             id = list(data.keys())[0]
             hosts_file(data[id]['ipAddress'], data[id]['Lab_Name'])
+            update_redis(r, data[id])
             r.publish('bootstrap', json.dumps({'bootstrap': data[id]['Lab_Name']}))
