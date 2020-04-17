@@ -18,7 +18,7 @@ chpasswd:
 packages:
   - language-pack-en
   - python3-redis
-  - python3-pyvmomi
+  - python3-pip
 
 manage_resolv_conf: true
 resolv_conf:
