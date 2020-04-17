@@ -3,7 +3,7 @@ data "vsphere_datacenter" "dc" {
 }
 
 data "vsphere_compute_cluster" "compute_cluster" {
-  name          = var.compute_cluster
+  name          = var.cluster
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -12,13 +12,13 @@ data "vsphere_datastore" "datastore" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_network" "network" {
-  name = var.network
-  datacenter_id = data.vsphere_datacenter.dc.id
+resource "vsphere_resource_pool" "resource_pool" {
+  name                    = var.id
+  parent_resource_pool_id = data.vsphere_compute_cluster.compute_cluster.resource_pool_id
 }
 
-data "vsphere_resource_pool" "pool" {
-  name          = "Resources"
+data "vsphere_network" "network" {
+  name = var.network
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -108,6 +108,46 @@ resource "vsphere_tag_category" "lab_timezone" {
   ]
 }
 
+resource "vsphere_tag_category" "lab_vcenter_host" {
+  name = "Lab_vcenter_host"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
+
+resource "vsphere_tag_category" "lab_vcenter_user" {
+  name = "Lab_vcenter_user"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
+resource "vsphere_tag_category" "lab_vcenter_password" {
+  name = "Lab_vcenter_id"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
+resource "vsphere_tag_category" "lab_dns_server" {
+  name = "Lab_dns_server"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
+resource "vsphere_tag_category" "lab_network_ipam_range" {
+  name = "Lab_network_ipam_range"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
 
 resource "vsphere_tag" "owner" {
   name             = var.owner

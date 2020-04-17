@@ -26,7 +26,7 @@ resource "vsphere_virtual_machine" "controller" {
   count            = var.pod_count
   name             = "${var.id}_controller.pod${count.index + 1}.lab"
   datastore_id     = data.vsphere_datastore.datastore.id
-  resource_pool_id = data.vsphere_resource_pool.pool.id
+  resource_pool_id = vsphere_resource_pool.resource_pool.id
   folder           = vsphere_folder.folder.path
   network_interface {
     network_id = data.vsphere_network.network.id
@@ -34,6 +34,7 @@ resource "vsphere_virtual_machine" "controller" {
 
   num_cpus = var.controller["cpu"]
   memory = var.controller["memory"]
+  wait_for_guest_net_timeout = 1
 
   guest_id = data.vsphere_virtual_machine.controller_template.guest_id
   scsi_type = data.vsphere_virtual_machine.controller_template.scsi_type
@@ -69,4 +70,20 @@ resource "vsphere_virtual_machine" "controller" {
     }
   }
 
+  connection {
+    host        = vsphere_virtual_machine.jumpbox.default_ip_address
+    type        = "ssh"
+    agent       = false
+    user        = "ubuntu"
+    private_key = tls_private_key.generated.private_key_pem
+  }
+
+  provisioner "remote-exec" {
+    inline      = [
+      "sudo rm -rf /opt/register_blocker",
+      "sudo /usr/local/bin/register.py 127.0.0.1 ${var.vsphere_server} ${var.vsphere_user} ${var.vsphere_password} ${self.name}"
+    ]
+  }
+
+  depends_on        = [ vsphere_virtual_machine.jumpbox ]
 }

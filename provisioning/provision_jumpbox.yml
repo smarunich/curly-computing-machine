@@ -115,7 +115,7 @@
       replace: "{{ item.replace }}"
     loop:
       - { regexp: '^#(no-resolv)$', replace: '\1' }
-      - { regexp: '^#(server)=/localnet/192.168.0.1$', replace: '\1=8.8.8.8' }
+      - { regexp: '^#(server)=/localnet/192.168.0.1$', replace: '\1 ={{ dns_server }}' }
       - { regexp: '^#(local)=/localnet/$', replace: '\1=/lab/' }
   - systemd:
       state: restarted

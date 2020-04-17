@@ -12,6 +12,16 @@ variable "pod_count" {
   default     = "1"
 }
 
+variable "master_count" {
+  description = "K8S Masters count per pod"
+  default     = "1"
+}
+
+variable "server_count" {
+  description = "K8S Workers count per pod"
+  default     = "4"
+}
+
 #Controller Details
 variable "controller" {
   type = map
@@ -32,6 +42,7 @@ variable "jumpbox" {
     cpu = 2
     memory = 4096
     disk = 20
+    # The image must support user-data, https://cloud-images.ubuntu.com/bionic/current/
     template = "ubuntu-bionic-18.04-cloudimg-20200407"
   # mgmt_ip = ""
   # mgmt_mask = ""
@@ -45,6 +56,7 @@ variable "server" {
     cpu = 4
     memory = 8192
     disk = 60
+    # The image must support user-data, https://cloud-images.ubuntu.com/bionic/current/
     template = "ubuntu-bionic-18.04-cloudimg-20200407"
   # mgmt_ip = ""
   # mgmt_mask = ""
@@ -68,4 +80,7 @@ variable "avi_backup_admin_password" {
 variable "lab_timezone" {
   description = "Lab Timezone: PST, EST, GMT or SGT"
   default = "EST"
+}
+
+variable "network_ipam_range" {
 }

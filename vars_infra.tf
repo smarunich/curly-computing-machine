@@ -7,12 +7,15 @@ variable "vsphere_password" {
 variable "vsphere_server" {
 }
 
+variable "dns_server" {
+  default = "8.8.8.8"
+}
 
 variable "dc" {
   default     = "wdc-06-vc10"
 }
 
-variable "compute_cluster" {
+variable "cluster" {
   default     = "wdc-06-vc10c01"
 }
 

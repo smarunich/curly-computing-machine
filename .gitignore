@@ -28,6 +28,7 @@ crashlytics-build.properties
 fabric.properties
 .idea/httpRequests
 keys/
+terraform.log
 .terraform/
 terraform.tfstate
 terraform.tfstate*

@@ -49,10 +49,35 @@ resource "vsphere_tag" "lab_avi_backup_admin_password" {
   category_id      = vsphere_tag_category.lab_avi_backup_admin_password.id
 }
 
+resource "vsphere_tag" "lab_vcenter_host" {
+  name             = var.vsphere_server
+  category_id      = vsphere_tag_category.lab_vcenter_host.id
+}
+
+resource "vsphere_tag" "lab_vcenter_user" {
+  name             = var.vsphere_user
+  category_id      = vsphere_tag_category.lab_vcenter_user.id
+}
+
+resource "vsphere_tag" "lab_vcenter_password" {
+  name             = base64encode(var.vsphere_password)
+  category_id      = vsphere_tag_category.lab_vcenter_password.id
+}
+
+resource "vsphere_tag" "lab_dns_server" {
+  name             = var.dns_server
+  category_id      = vsphere_tag_category.lab_dns_server.id
+}
+
+resource "vsphere_tag" "lab_network_ipam_range" {
+  name             = var.network_ipam_range
+  category_id      = vsphere_tag_category.lab_network_ipam_range.id
+}
+
 resource "vsphere_virtual_machine" "jumpbox" {
   name             = "${var.id}_jumpbox.pod.lab"
   datastore_id     = data.vsphere_datastore.datastore.id
-  resource_pool_id = data.vsphere_resource_pool.pool.id
+  resource_pool_id = vsphere_resource_pool.resource_pool.id
   folder           = vsphere_folder.folder.path
   network_interface {
                       network_id = data.vsphere_network.network.id
@@ -60,6 +85,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
 
   num_cpus = var.jumpbox["cpu"]
   memory = var.jumpbox["memory"]
+  wait_for_guest_net_timeout = 1
   guest_id = data.vsphere_virtual_machine.jumpbox_template.guest_id
   scsi_type = data.vsphere_virtual_machine.jumpbox_template.scsi_type
   scsi_bus_sharing = data.vsphere_virtual_machine.jumpbox_template.scsi_bus_sharing
@@ -92,6 +118,13 @@ resource "vsphere_virtual_machine" "jumpbox" {
         vsphere_tag.lab_avi_backup_admin_username.id,
         vsphere_tag.lab_avi_backup_admin_password.id,
 
+        vsphere_tag.lab_vcenter_host.id,
+        vsphere_tag.lab_vcenter_user.id,
+        vsphere_tag.lab_vcenter_password.id,
+
+        vsphere_tag.lab_dns_server.id,
+        vsphere_tag.lab_network_ipam_range.id,
+
         vsphere_tag.lab_timezone.id
   ]
 
@@ -119,7 +152,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${vsphere_virtual_machine.jumpbox.default_ip_address},' --private-key ${local.private_key_filename} -e'private_key_filename=${local.private_key_filename} vcenter_host=${var.vsphere_server} vcenter_user=${var.vsphere_user} vcenter_password=${var.vsphere_password} vm_name=${var.id}_jumpbox.pod.lab' --user ubuntu provisioning/provision_jumpbox.yml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${vsphere_virtual_machine.jumpbox.default_ip_address},' --private-key ${local.private_key_filename} -e'private_key_filename=${local.private_key_filename} vcenter_host=${var.vsphere_server} vcenter_user=${var.vsphere_user} vcenter_password=${var.vsphere_password} vm_name=${var.id}_jumpbox.pod.lab dns_server=${var.dns_server}' --user ubuntu provisioning/provision_jumpbox.yml"
   }
 
 }
