@@ -76,16 +76,8 @@
   - user:
       name: aviadmin
       groups: docker
-  - uri:
-      url: "http://169.254.169.254/latest/meta-data/local-hostname"
-      return_content: yes
-    register: aws_hostname
-  - debug:
-      var: aws_hostname.content
   - debug:
       var: ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])
-  - hostname:
-      name: "{{ aws_hostname.content }}"
   - service:
       name: kubelet
       state: started

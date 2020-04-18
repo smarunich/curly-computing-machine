@@ -58,7 +58,8 @@ resource "vsphere_virtual_machine" "controller" {
         vsphere_tag.controller_lab_group.id,
         vsphere_tag.owner.id,
         vsphere_tag.lab_id.id,
-        vsphere_tag.lab_timezone.id
+        vsphere_tag.lab_timezone.id,
+        vsphere_tag.ansible_connection_local.id
   ]
 
    vapp {

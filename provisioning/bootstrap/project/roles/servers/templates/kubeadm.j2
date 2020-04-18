@@ -7,6 +7,3 @@ discovery:
     apiServerEndpoint: "{{ k8s_master }}:6443"
     caCertHashes:
       - "sha256:{{ hostvars[k8s_master].kubeadm_hash }}"
-nodeRegistration:
-  kubeletExtraArgs:
-    cloud-provider: aws

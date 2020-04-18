@@ -12,16 +12,6 @@
     avi_credentials: "{{ avi_credentials }}"
     avi_config:
       ipamdnsproviderprofile:
-        - name: "ipam_app.{{ pod_domain }}"
-          aws_profile:
-            use_iam_roles: true
-            vpc_id: "{{ hostvars['jumpbox.pod.lab']['Lab_vpc_id'] }}"
-            region: "{{ hostvars['jumpbox.pod.lab']['region'] }}"
-            zones:
-              - usable_network_uuids:
-                  - "{{ subnet['results'][0]['obj']['results'][0]['uuid'] }}"
-                availability_zone: "{{ hostvars['jumpbox.pod.lab']['availabilityZone'] }}"
-          type: IPAMDNS_TYPE_AWS
         - name: "dns_app.{{ pod_domain }}"
           internal_profile:
             dns_service_domain:
@@ -46,16 +36,6 @@
     avi_credentials: "{{ avi_credentials }}"
     avi_config:
       ipamdnsproviderprofile:
-        - name: "ipam_app.{{ pod_domain }}"
-          aws_profile:
-            use_iam_roles: true
-            vpc_id: "{{ hostvars['jumpbox.pod.lab']['Lab_vpc_id'] }}"
-            region: "{{ hostvars['jumpbox.pod.lab']['region'] }}"
-            zones:
-              - usable_network_uuids:
-                  - "{{ subnet['results'][0]['obj']['results'][0]['uuid'] }}"
-                availability_zone: "{{ hostvars['jumpbox.pod.lab']['availabilityZone'] }}"
-          type: IPAMDNS_TYPE_AWS
         - name: "dns_app.{{ pod_domain }}"
           internal_profile:
             dns_service_domain:
@@ -100,7 +80,7 @@
     avi_credentials: "{{ avi_credentials }}"
     name: K8S
     vtype: CLOUD_OSHIFT_K8S
-    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam_app.{{ pod_domain }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
     dns_provider_ref: "/api/ipamdnsproviderprofile?name=dns_app.{{ pod_domain }}"
     oshiftk8s_configuration:
       "{{ oshiftk8s_configuration }}"
@@ -116,7 +96,7 @@
     avi_credentials: "{{ avi_credentials }}"
     name: K8S
     vtype: CLOUD_OSHIFT_K8S
-    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam_app.{{ pod_domain }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
     dns_provider_ref: "/api/ipamdnsproviderprofile?name=dns_app.{{ pod_domain }}"
     oshiftk8s_configuration:
       "{{ oshiftk8s_configuration }}"

@@ -133,6 +133,14 @@ resource "vsphere_tag_category" "lab_vcenter_password" {
   ]
 }
 
+resource "vsphere_tag_category" "lab_dc" {
+  name = "Lab_dc"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
 resource "vsphere_tag_category" "lab_dns_server" {
   name = "Lab_dns_server"
   cardinality = "SINGLE"
@@ -149,6 +157,15 @@ resource "vsphere_tag_category" "lab_network_ipam_range" {
   ]
 }
 
+resource "vsphere_tag_category" "ansible_connection" {
+  name = "ansible_connection"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
+
 resource "vsphere_tag" "owner" {
   name             = var.owner
   category_id      = vsphere_tag_category.owner.id
@@ -162,4 +179,9 @@ resource "vsphere_tag" "lab_id" {
 resource "vsphere_tag" "lab_timezone" {
   name             = var.lab_timezone
   category_id      = vsphere_tag_category.lab_timezone.id
+}
+
+resource "vsphere_tag" "ansible_connection_local" {
+  name             = "local"
+  category_id      = vsphere_tag_category.ansible_connection.id
 }

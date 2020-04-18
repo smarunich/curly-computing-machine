@@ -49,6 +49,11 @@ resource "vsphere_tag" "lab_avi_backup_admin_password" {
   category_id      = vsphere_tag_category.lab_avi_backup_admin_password.id
 }
 
+resource "vsphere_tag" "lab_dc" {
+  name             = var.dc
+  category_id      = vsphere_tag_category.lab_dc.id
+}
+
 resource "vsphere_tag" "lab_vcenter_host" {
   name             = var.vsphere_server
   category_id      = vsphere_tag_category.lab_vcenter_host.id
@@ -118,6 +123,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
         vsphere_tag.lab_avi_backup_admin_username.id,
         vsphere_tag.lab_avi_backup_admin_password.id,
 
+        vsphere_tag.lab_dc.id,
         vsphere_tag.lab_vcenter_host.id,
         vsphere_tag.lab_vcenter_user.id,
         vsphere_tag.lab_vcenter_password.id,

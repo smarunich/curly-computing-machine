@@ -11,6 +11,7 @@
         - python-psutil
         - python3-pip
         - python3-redis
+        - python-netaddr
         - ansible
         - dnsmasq
         - nginx

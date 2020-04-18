@@ -37,7 +37,7 @@
     welcome_workflow_complete: true
     dns_configuration:
       server_list:
-        - addr: "{{ hostvars['jumpbox.pod.lab']['privateIp'] }}"
+        - addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
           type: V4
         - addr: 8.8.4.4
           type: V4
@@ -76,28 +76,67 @@
     backup_passphrase: "{{ hostvars['jumpbox.pod.lab']['Lab_avi_backup_admin_password'] }}"
     upload_to_remote_host: false
 
-- name: Define AWS cloud configuration
+- name: VMware Cloud Connector Setup
   avi_cloud:
     avi_credentials: "{{ avi_credentials }}"
-    name: AWS
-    vtype: CLOUD_AWS
-    aws_configuration:
-      use_iam_roles: true
-      region: "{{ hostvars['jumpbox.pod.lab']['region'] }}"
-      vpc_id: "{{ hostvars['jumpbox.pod.lab']['Lab_vpc_id'] }}"
-      zones:
-        - availability_zone: "{{ hostvars['jumpbox.pod.lab']['availabilityZone'] }}"
-          mgmt_network_name: "{{ hostvars['jumpbox.pod.lab']['Lab_avi_mgmt_net'] }}"
-  register: cloud
+    name: Default-Cloud
+    vtype: CLOUD_VCENTER
+    dhcp_enabled: true
+    vcenter_configuration:
+      username: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_user'] }}"
+      password: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_id'] | b64decode }}"
+      datacenter: "{{ hostvars['jumpbox.pod.lab']['Lab_dc'] }}"
+      management_network: "/api/vimgrnwruntime/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
+      privilege: "WRITE_ACCESS"
+      vcenter_url: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_host'] }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
 
-- name: Build VIP network details
-  avi_api_session:
+- name: Define IPAM Profile
+  import_role:
+    name: avinetworks.aviconfig
+  vars:
     avi_credentials: "{{ avi_credentials }}"
-    http_method: get
-    path: "networksubnetlist?name={{ item }}&cloud_uuid={{ cloud['obj']['uuid'] }}"
-  register: subnet
-  with_items:
-    - "{{ hostvars['jumpbox.pod.lab']['Lab_avi_app_net'] }}"
+    avi_config:
+      network:
+        - name: "{{ hostvars['jumpbox.pod.lab']['network'] }}"
+          cloud_ref: '/api/cloud?name=Default-Cloud'
+          exclude_discovered_subnets: true
+          configured_subnets:
+            - prefix:
+                ip_addr:
+                  type: V4
+                  addr: "{{ ansible_default_ipv4.network }}"
+                mask: "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ipaddr('prefix') }}"
+              static_ranges:
+                - begin:
+                    type: V4
+                    addr: "{{ hostvars['jumpbox.pod.lab']['Lab_network_ipam_range'].split('-')[0] }}"
+                  end:
+                    type: V4
+                    addr: "{{ hostvars['jumpbox.pod.lab']['Lab_network_ipam_range'].split('-')[1] }}"
+      ipamdnsprovider:
+        - name: ipam
+          allocate_ip_in_vrf: false
+          internal_profile:
+            usable_network_refs:
+              - "/api/network/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
+            ttl: 30
+          type: IPAMDNS_TYPE_INTERNAL
+
+- name: VMware Cloud Connector Setup
+  avi_cloud:
+    avi_credentials: "{{ avi_credentials }}"
+    name: Default-Cloud
+    vtype: CLOUD_VCENTER
+    dhcp_enabled: true
+    vcenter_configuration:
+      username: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_user'] }}"
+      password: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_id'] | b64decode }}"
+      datacenter: "{{ hostvars['jumpbox.pod.lab']['Lab_dc'] }}"
+      management_network: "/api/vimgrnwruntime/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
+      privilege: "WRITE_ACCESS"
+      vcenter_url: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_host'] }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
 
 - name: Define DNS Virtual Service
   import_role:
@@ -107,14 +146,15 @@
     avi_config:
       vsvip:
         - name: vsvip_dns
-          cloud_ref: '/api/cloud?name=AWS'
+          cloud_ref: '/api/cloud?name=Default-Cloud'
           vip:
             - auto_allocate_ip: true
-              subnet_uuid: "{{ subnet['results'][0]['obj']['results'][0]['uuid'] }}"
-              auto_allocate_floating_ip: true
+              enabled: true
+              ipam_network_subnet:
+                network_ref: "/api/network/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
       virtualservice:
-        - name: "{{ 'vs_dns_' + hostvars['jumpbox.pod.lab']['region'] }}"
-          cloud_ref: '/api/cloud?name=AWS'
+        - name: vs_dns
+          cloud_ref: '/api/cloud?name=Default-Cloud'
           application_profile_ref: '/api/applicationprofile?name=System-DNS'
           network_profile_ref: '/api/networkprofile/?name=System-UDP-Per-Pkt'
           services:
@@ -170,7 +210,7 @@
     avi_credentials: "{{ avi_credentials }}"
     avi_api_update_method: patch
     avi_api_patch_op: replace
-    dns_virtualservice_refs: "/api/virtualservice/?name=vs_dns_{{ hostvars['jumpbox.pod.lab']['region'] }}"
+    dns_virtualservice_refs: "/api/virtualservice/?name=vs_dns }}"
 
 - name: Collect cluster details
   avi_api_session:
@@ -193,7 +233,7 @@
               name: "{{ inventory_hostname }}"
               ip_addresses:
                 - type: V4
-                  addr: "{{ hostvars[avi_credentials.controller]['privateIp'] }}"
+                  addr: "{{ hostvars[avi_credentials.controller]['ipAddress'] }}"
               enabled: true
               member_type: GSLB_ACTIVE_MEMBER
               cluster_uuid: "{{ cluster['obj'].uuid }}"
