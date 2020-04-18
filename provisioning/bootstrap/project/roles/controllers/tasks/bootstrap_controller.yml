@@ -89,7 +89,9 @@
       management_network: "/api/vimgrnwruntime/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
       privilege: "WRITE_ACCESS"
       vcenter_url: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_host'] }}"
-    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
+
+- pause:
+    minutes: 2
 
 - name: Define IPAM Profile
   import_role:
@@ -114,7 +116,7 @@
                   end:
                     type: V4
                     addr: "{{ hostvars['jumpbox.pod.lab']['Lab_network_ipam_range'].split('-')[1] }}"
-      ipamdnsprovider:
+      ipamdnsproviderprofile:
         - name: ipam
           allocate_ip_in_vrf: false
           internal_profile:
