@@ -81,6 +81,3 @@ variable "lab_timezone" {
   description = "Lab Timezone: PST, EST, GMT or SGT"
   default = "EST"
 }
-
-variable "network_ipam_range" {
-}

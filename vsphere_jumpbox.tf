@@ -74,11 +74,6 @@ resource "vsphere_tag" "lab_dns_server" {
   category_id      = vsphere_tag_category.lab_dns_server.id
 }
 
-resource "vsphere_tag" "lab_network_ipam_range" {
-  name             = var.network_ipam_range
-  category_id      = vsphere_tag_category.lab_network_ipam_range.id
-}
-
 resource "vsphere_virtual_machine" "jumpbox" {
   name             = "${var.id}_jumpbox.pod.lab"
   datastore_id     = data.vsphere_datastore.datastore.id
@@ -129,7 +124,6 @@ resource "vsphere_virtual_machine" "jumpbox" {
         vsphere_tag.lab_vcenter_password.id,
 
         vsphere_tag.lab_dns_server.id,
-        vsphere_tag.lab_network_ipam_range.id,
 
         vsphere_tag.lab_timezone.id
   ]

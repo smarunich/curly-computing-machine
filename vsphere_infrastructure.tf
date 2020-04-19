@@ -149,14 +149,6 @@ resource "vsphere_tag_category" "lab_dns_server" {
   ]
 }
 
-resource "vsphere_tag_category" "lab_network_ipam_range" {
-  name = "Lab_network_ipam_range"
-  cardinality = "SINGLE"
-  associable_types = [
-    "VirtualMachine",
-  ]
-}
-
 resource "vsphere_tag_category" "ansible_connection" {
   name = "ansible_connection"
   cardinality = "SINGLE"

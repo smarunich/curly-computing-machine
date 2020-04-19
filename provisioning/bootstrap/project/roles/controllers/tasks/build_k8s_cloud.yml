@@ -1,3 +1,4 @@
+# import from as679/improved-telegram, requires updates
 ---
 - set_fact:
     pod_id: "{{ inventory_hostname | regex_replace('^controller.pod(\\d+).lab', '\\1') }}"
