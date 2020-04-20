@@ -51,7 +51,7 @@ resource "vsphere_virtual_machine" "master" {
 
   num_cpus = var.server["cpu"]
   memory = var.server["memory"]
-  wait_for_guest_net_timeout = 2
+  wait_for_guest_net_timeout = var.wait_for_guest_net_timeout
   guest_id = data.vsphere_virtual_machine.master_template.guest_id
   scsi_type = data.vsphere_virtual_machine.master_template.scsi_type
   scsi_bus_sharing = data.vsphere_virtual_machine.master_template.scsi_bus_sharing

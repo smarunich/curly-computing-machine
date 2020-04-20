@@ -85,7 +85,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
 
   num_cpus = var.jumpbox["cpu"]
   memory = var.jumpbox["memory"]
-  wait_for_guest_net_timeout = 2
+  wait_for_guest_net_timeout = var.wait_for_guest_net_timeout
   guest_id = data.vsphere_virtual_machine.jumpbox_template.guest_id
   scsi_type = data.vsphere_virtual_machine.jumpbox_template.scsi_type
   scsi_bus_sharing = data.vsphere_virtual_machine.jumpbox_template.scsi_bus_sharing
