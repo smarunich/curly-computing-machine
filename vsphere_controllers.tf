@@ -34,7 +34,7 @@ resource "vsphere_virtual_machine" "controller" {
 
   num_cpus = var.controller["cpu"]
   memory = var.controller["memory"]
-  wait_for_guest_net_timeout = 1
+  wait_for_guest_net_timeout = 2
 
   guest_id = data.vsphere_virtual_machine.controller_template.guest_id
   scsi_type = data.vsphere_virtual_machine.controller_template.scsi_type
