@@ -154,6 +154,13 @@
       dest: /usr/local/bin/ipam_server.py
       mode: 0755
   - copy:
+      src: ../provisioning/ipam_init.py
+      dest: /usr/local/bin/ipam_init.py
+      mode: 0755
+  - shell: /usr/local/bin/ipam_init.py --cidr {{ vip_ipam_cidr }}  --allocation_range {{ vip_ipam_allocation_range }}
+    args:
+      chdir: /usr/local/bin/
+  - copy:
       src: ../provisioning/handle_ipam.service
       dest: /etc/systemd/system/handle_ipam.service
   - systemd:

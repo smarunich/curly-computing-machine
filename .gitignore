@@ -34,3 +34,5 @@ terraform.tfstate
 terraform.tfstate*
 terraform.tfvars
 *.retry
+*.pyc
+*.sqlite

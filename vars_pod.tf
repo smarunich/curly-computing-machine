@@ -86,3 +86,11 @@ variable "lab_timezone" {
 variable "wait_for_guest_net_timeout" {
   default = "2"
 }
+
+variable "vip_ipam_cidr" {
+ default = "10.206.40.0/22"
+}
+
+variable "vip_ipam_allocation_range" {
+ default = "10.206.41.1-10.206.41.40"
+}

@@ -1,4 +1,11 @@
 import ipam
+import argparse
 
-ipam = ipam.IpamDB()
-print('5:%s' % ipam.create_network('12.0.0.0/16','12.0.0.10','12.0.0.11'))
+parser = argparse.ArgumentParser()
+parser.add_argument('--cidr', required=True)
+parser.add_argument('--allocation_range', required=True)
+args = parser.parse_args()
+
+if args.cidr and args.allocation_range:
+    ipam = ipam.IpamDB()
+    ipam.create_network(args.cidr,args.allocation_range.split('-')[0],args.allocation_range.split('-')[1])
