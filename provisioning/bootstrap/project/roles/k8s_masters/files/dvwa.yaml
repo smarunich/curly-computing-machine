@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dvwa-deployment
+spec:
+  selector:
+    matchLabels:
+      app: dvwa
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: dvwa
+    spec:
+      containers:
+      - name: dvwa
+        image: citizenstig/dvwa
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dvwa-service
+spec:
+  selector:
+    app: dvwa
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    nodePort: 30001
+  type: NodePort

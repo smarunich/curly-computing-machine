@@ -23,7 +23,9 @@
         - boto3
         - ansible-runner
         - pyvmomi
+        - apsw
       extra_args: --upgrade
+
   - shell: ansible-galaxy install avinetworks.avisdk avinetworks.aviconfig
     become_user: ubuntu
   - file:
@@ -140,5 +142,24 @@
       src: ../provisioning/register.py
       dest: /var/www/html/register.py
       mode: 0755
+
+  - name: Generate a Self Signed OpenSSL certificate
+    shell: openssl req -new -x509 -keyout /usr/local/bin/ipam.pem -out /usr/local/bin/ipam.pem -days 365 -nodes -subj '/CN=jumpbox.pod.lab/O=Labs/C=US'
+
+  - copy:
+      src: ../provisioning/ipam
+      dest: /usr/lib/python3.6
+  - copy:
+      src: ../provisioning/ipam_server.py
+      dest: /usr/local/bin/ipam_server.py
+      mode: 0755
+  - copy:
+      src: ../provisioning/handle_ipam.service
+      dest: /etc/systemd/system/handle_ipam.service
+  - systemd:
+      state: restarted
+      daemon_reload: yes
+      name: handle_ipam
+
   - shell: "/usr/local/bin/register.py 127.0.0.1 {{ vcenter_host }} {{ vcenter_user }} {{ vcenter_password }} {{ vm_name }}"
     register: register
