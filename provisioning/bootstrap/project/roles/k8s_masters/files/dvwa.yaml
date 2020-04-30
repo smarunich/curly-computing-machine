@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dvwa-deployment
+  name: dvwa
 spec:
   selector:
     matchLabels:
@@ -21,7 +21,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: dvwa-service
+  name: dvwa
 spec:
   selector:
     app: dvwa

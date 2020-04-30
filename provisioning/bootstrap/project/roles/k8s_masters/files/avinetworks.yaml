@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: avinetworks-deployment
+  name: avinetworks
 spec:
   selector:
     matchLabels:
@@ -21,7 +21,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: avinetworks-service
+  name: avinetworks
 spec:
   selector:
     app: avinetworks

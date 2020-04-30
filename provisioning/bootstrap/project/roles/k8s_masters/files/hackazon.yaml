@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hackazon-deployment
+  name: hackazon
 spec:
   selector:
     matchLabels:
@@ -22,7 +22,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: hackazon-service
+  name: hackazon
 spec:
   selector:
     app: hackazon

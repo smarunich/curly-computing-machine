@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: juice-deployment
+  name: juice
 spec:
   selector:
     matchLabels:
@@ -21,7 +21,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: juice-service
+  name: juice
 spec:
   selector:
     app: juice
