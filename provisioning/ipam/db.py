@@ -12,6 +12,8 @@ class IpamDB(object):
                         id integer PRIMARY KEY,
                         view_id integer NOT NULL,
                         cidr text NOT NULL,
+                        allocation_start text NULL,
+                        allocation_end text NULL,
                         FOREIGN KEY (view_id) REFERENCES views(id)
                     );'''
     hosts_table = '''CREATE TABLE IF NOT EXISTS hosts (
@@ -86,16 +88,19 @@ class IpamDB(object):
             result['count'] += 1
         return result
 
-    def create_network(self, cidr, view_name='default'):
+    def create_network(self, cidr, allocation_start='', allocation_end='', view_name='default'):
+        if allocation_start == '':
+            allocation_start = str(ipaddress.IPv4Network(cidr)[0])
+            allocation_end = str(ipaddress.IPv4Network(cidr)[-1])
         try:
             view_id = self.get_view(view_name=view_name)['id']
         except TypeError as e:
             return None
-        insert = "INSERT INTO networks(cidr, view_id) VALUES(?,?)"
+        insert = "INSERT INTO networks(cidr, allocation_start, allocation_end, view_id) VALUES(?,?,?,?)"
         cur = self.conn.cursor()
         network = self.get_network(cidr, view_name)
         if not network:
-            cur.execute(insert, (cidr, view_id))
+            cur.execute(insert, (cidr, allocation_start, allocation_end, view_id))
             network = self.get_network(cidr, view_name)
         return network
 
@@ -111,11 +116,11 @@ class IpamDB(object):
 
     def get_network(self, cidr, view_name='default'):
         view = self.get_view(view_name=view_name)
-        select = "SELECT id, cidr FROM networks WHERE cidr=? AND view_id=?"
+        select = "SELECT id, cidr, allocation_start, allocation_end FROM networks WHERE cidr=? AND view_id=?"
         cur = self.conn.cursor()
         try:
             *_, row = cur.execute(select, (cidr, view['id']))
-            network = {'id': row[0], 'cidr': row[1], 'view': view}
+            network = {'id': row[0], 'cidr': row[1], 'allocation_start': row[2], 'allocation_end': row[3], 'view': view}
         except ValueError as e:
             network = None
         return network
@@ -190,8 +195,13 @@ class IpamDB(object):
         if network:
             hosts = self.get_hosts(network['cidr'])
             for ip_addr in ipaddress.ip_network(network['cidr']).hosts():
+                if ip_addr < ipaddress.IPv4Address(network['allocation_start']):
+                    continue
+                if ip_addr > ipaddress.IPv4Address(network['allocation_end']):
+                    return False
                 if str(ip_addr) not in list(map(lambda x: x['ip_address'], hosts['hosts'])):
                     return self.create_host(name, str(ip_addr), fqdn=fqdn, view_name=view_name)
+
 
     def find_network_for_ip(self, ip, view_name='default'):
         networks = self.get_networks(view_name=view_name)
