@@ -67,7 +67,6 @@ root@avitools:~/curly-computing-machine# cp sample_terraform_tfvars terraform.tf
 ```
 4. Fill out the required variables - terraform.tfvars
 
-    **NOTE**: Avi Controller AMI must be shared with the target AWS account
 ```
 #terraform.tfvars
 vsphere_server = ""
