@@ -118,11 +118,9 @@
 - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add stable https://kubernetes-charts.storage.googleapis.com/
 - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo update
 
-- block:
-  - copy:
-      src: "{{ item }}"
-      dest: "/home/ubuntu/{{ item }}"
-  - shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/{{ item }}"
+- copy:
+    src: "{{ item }}"
+    dest: "/home/ubuntu/{{ item }}"
   loop:
     - kuard.yaml
     - avinetworks.yaml
@@ -133,3 +131,14 @@
     - hackazon.yaml
     - dvwa.yaml
     #-jupyter.yaml
+- shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/{{ item }}"
+  loop:
+    - kuard.yaml
+    - avinetworks.yaml
+    - httpbin.yaml
+    - juice.yaml
+    - sockshop.yaml
+    - kubernetes-dashboard.yaml
+    - hackazon.yaml
+    - dvwa.yaml
+      #-jupyter.yaml
