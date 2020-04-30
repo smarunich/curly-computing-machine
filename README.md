@@ -288,4 +288,4 @@ sock-shop              user-db                     ClusterIP   10.101.77.230    
 ubuntu@master1:~$ kubectl describe secret -n kubernetes-dashboard kubernetes-dashboard
 ```
 
-11. (Optional) Access Kubernetes Dashboard using one of the servers ips, https://10.206.42.218:30005 with the secret retrieved from the previous step.
+11. (Optional) Access Kubernetes Dashboard using one of the servers node addresses, https://10.206.42.218:30005 with the secret retrieved from the previous step.
