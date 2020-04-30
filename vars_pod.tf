@@ -19,7 +19,7 @@ variable "master_count" {
 
 variable "server_count" {
   description = "K8S Workers count per pod"
-  default     = "4"
+  default     = "3"
 }
 
 #Controller Details
@@ -53,8 +53,8 @@ variable "jumpbox" {
 variable "server" {
   type = map
   default = {
-    cpu = 4
-    memory = 8192
+    cpu = 2
+    memory = 4096
     disk = 60
     # The image must support user-data, https://cloud-images.ubuntu.com/bionic/current/
     template = "ubuntu-bionic-18.04-cloudimg-20200407"

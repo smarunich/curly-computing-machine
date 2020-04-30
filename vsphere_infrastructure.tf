@@ -149,6 +149,14 @@ resource "vsphere_tag_category" "lab_dns_server" {
   ]
 }
 
+resource "vsphere_tag_category" "lab_vip_ipam_cidr" {
+  name = "Lab_vip_ipam_cidr"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
 resource "vsphere_tag_category" "ansible_connection" {
   name = "ansible_connection"
   cardinality = "SINGLE"

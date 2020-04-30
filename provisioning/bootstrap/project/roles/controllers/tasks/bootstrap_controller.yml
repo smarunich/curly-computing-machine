@@ -76,6 +76,43 @@
     backup_passphrase: "{{ hostvars['jumpbox.pod.lab']['Lab_avi_backup_admin_password'] }}"
     upload_to_remote_host: false
 
+- set_fact:
+    pod_id: "{{ inventory_hostname | regex_replace('^controller.pod(\\d+).lab', '\\1') }}"
+    pod_domain: "{{ inventory_hostname | regex_replace('controller.','') }}"
+
+- name: Define IPAM Profile
+  import_role:
+    name: avinetworks.aviconfig
+  vars:
+    avi_credentials: "{{ avi_credentials }}"
+    avi_config:
+      ipamdnsproviderprofile:
+        - name: ipam
+          infoblox_profile:
+            username: admin
+            network_view: default
+            wapi_version: '2.0'
+            usable_subnets:
+              - mask: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[1] }}"
+                ip_addr:
+                  type: V4
+                  addr: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[0] }}"
+            dns_view: default
+            password: admin
+            ip_address:
+              type: V4
+              addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
+          type: IPAMDNS_TYPE_INFOBLOX
+          name: ipam
+        - name: dns
+          internal_profile:
+            dns_service_domain:
+              - num_dns_ip: 1
+                domain_name: "app.{{ pod_domain }}"
+                pass_through: true
+            ttl: 30
+          type: IPAMDNS_TYPE_INTERNAL_DNS
+
 - name: VMware Cloud Connector Setup
   avi_cloud:
     avi_credentials: "{{ avi_credentials }}"
@@ -89,6 +126,8 @@
       management_network: "/api/vimgrnwruntime/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
       privilege: "WRITE_ACCESS"
       vcenter_url: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_host'] }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
+    dns_provider_ref: "/api/ipamdnsproviderprofile?name=dns"
 
 - pause:
     minutes: 2
@@ -106,3 +145,79 @@
       management_network: "/api/vimgrnwruntime/?name={{ hostvars['jumpbox.pod.lab']['network'] }}"
       privilege: "WRITE_ACCESS"
       vcenter_url: "{{ hostvars['jumpbox.pod.lab']['Lab_vcenter_host'] }}"
+    ipam_provider_ref: "/api/ipamdnsproviderprofile?name=ipam"
+    dns_provider_ref: "/api/ipamdnsproviderprofile?name=dns"
+    se_group_template_ref: "/api/serviceenginegroup?name=Default-Group"
+
+- name: VMware Default-Group Setup
+  avi_serviceenginegroup:
+    avi_credentials: "{{ avi_credentials }}"
+    name: Default-Group
+    mem_reserve: false
+    vcenter_folder: "{{ hostvars['jumpbox.pod.lab']['Lab_Id'] }}"
+    se_name_prefix: "{{ hostvars['jumpbox.pod.lab']['Lab_Id'] }}{{ pod_id }}"
+
+- name: Define DNS Virtual Service
+  import_role:
+    name: avinetworks.aviconfig
+  vars:
+    avi_credentials: "{{ avi_credentials }}"
+    avi_config:
+      vsvip:
+        - name: vsvip_dns
+          cloud_ref: '/api/cloud?name=Default-Cloud'
+          vip:
+            - auto_allocate_ip: true
+              ipam_network_subnet:
+                subnet:
+                  mask: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[1] }}"
+                  ip_addr:
+                    type: V4
+                    addr: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[0] }}"
+              auto_allocate_ip_type: V4_ONLY
+      virtualservice:
+        - name: "{{ 'vs_dns' }}"
+          cloud_ref: '/api/cloud?name=Default-Cloud'
+          application_profile_ref: '/api/applicationprofile?name=System-DNS'
+          network_profile_ref: '/api/networkprofile/?name=System-UDP-Per-Pkt'
+          services:
+            - port: 53
+            - port: 53
+              override_network_profile_ref: '/api/networkprofile/?name=System-TCP-Proxy'
+          vsvip_ref: '/api/vsvip?name=vsvip_dns'
+
+- name: Build VIP network details
+  avi_api_session:
+    avi_credentials: "{{ avi_credentials }}"
+    http_method: get
+    path: "virtualservice?include_name&services.0.port=53"
+  register: dns_vs
+
+- set_fact:
+    dns_vs_ip: "{{ dns_vs['obj']['results'][0]['vip'][0]['ip_address']['addr'] }}"
+
+- lineinfile:
+    dest: /etc/dnsmasq.conf
+    insertafter: EOF
+    line: server=/app.{{ pod_domain }}/{{ dns_vs_ip }}
+  delegate_to: localhost
+  become: true
+- lineinfile:
+    dest: /etc/dnsmasq.conf
+    insertafter: EOF
+    line: server=/global.{{ pod_domain }}/{{ dns_vs_ip }}
+  delegate_to: localhost
+  become: true
+
+- systemd:
+    state: restarted
+    name: dnsmasq
+  delegate_to: localhost
+  become: true
+
+- name: Patch systemconfiguration with K8S DNS Virtual Service
+  avi_systemconfiguration:
+    avi_credentials: "{{ avi_credentials }}"
+    avi_api_update_method: patch
+    avi_api_patch_op: replace
+    dns_virtualservice_refs: "/api/virtualservice/?name=vs_dns }}"
