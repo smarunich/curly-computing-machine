@@ -9,6 +9,11 @@
   roles:
     - controllers
 
+- hosts: k8s_masters
+  become: yes
+  roles:
+  - k8s_masters
+
 - hosts: servers
   become: yes
   roles:
@@ -18,8 +23,3 @@
   become: yes
   roles:
   - jumpbox
-
-- hosts: k8s_masters
-  become: yes
-  roles:
-  - k8s_masters
