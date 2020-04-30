@@ -29,4 +29,5 @@ spec:
   - protocol: TCP
     name: http
     port: 80
-  nodePort: 30001
+    nodePort: 30001
+  type: NodePort
