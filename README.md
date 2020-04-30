@@ -231,4 +231,61 @@ ubuntu@jumpbox:~$ /etc/ansible/hosts --list | jq . | more
         "Owner": "aviVMware_Training",
         "Name": "controller.pod2.lab"
       },
+...
+ubuntu@jumpbox:~$ ssh master1.pod1.lab
+Welcome to Ubuntu 18.04.4 LTS (GNU/Linux 4.15.0-96-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Thu Apr 30 20:11:26 UTC 2020
+
+  System load:  0.23              Users logged in:        0
+  Usage of /:   5.9% of 57.98GB   IP address for ens192:  10.206.42.223
+  Memory usage: 23%               IP address for docker0: 172.17.0.1
+  Swap usage:   0%                IP address for cni0:    10.244.0.1
+  Processes:    138
+
+
+18 packages can be updated.
+10 updates are security updates.
+
+
+Last login: Thu Apr 30 18:32:18 2020 from 10.206.42.231
+ubuntu@master1:~$ kubectl get nodes -o wide
+NAME               STATUS   ROLES    AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1.pod1.lab   Ready    master   123m   v1.18.2   10.206.42.223   <none>        Ubuntu 18.04.4 LTS   4.15.0-96-generic   docker://19.3.6
+server1.pod1.lab   Ready    <none>   122m   v1.18.2   10.206.42.212   <none>        Ubuntu 18.04.4 LTS   4.15.0-96-generic   docker://19.3.6
+server2.pod1.lab   Ready    <none>   122m   v1.18.2   10.206.42.217   <none>        Ubuntu 18.04.4 LTS   4.15.0-96-generic   docker://19.3.6
+server3.pod1.lab   Ready    <none>   122m   v1.18.2   10.206.42.218   <none>        Ubuntu 18.04.4 LTS   4.15.0-96-generic   docker://19.3.6
+ubuntu@master1:~$ kubectl get svc -A
+NAMESPACE              NAME                        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+default                avinetworks                 NodePort    10.100.236.11    <none>        80:30001/TCP                 123m
+default                dvwa                        NodePort    10.110.199.5     <none>        80:30081/TCP                 123m
+default                hackazon                    NodePort    10.111.212.244   <none>        80:30080/TCP,443:30443/TCP   123m
+default                httpbin                     NodePort    10.100.134.178   <none>        80:30002/TCP                 123m
+default                juice                       NodePort    10.96.25.182     <none>        3000:30003/TCP               123m
+default                kuard                       NodePort    10.99.5.233      <none>        8080:30000/TCP               123m
+default                kubernetes                  ClusterIP   10.96.0.1        <none>        443/TCP                      123m
+kube-system            kube-dns                    ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP       123m
+kubernetes-dashboard   dashboard-metrics-scraper   ClusterIP   10.104.57.68     <none>        8000/TCP                     123m
+kubernetes-dashboard   kubernetes-dashboard        NodePort    10.100.228.249   <none>        8443:30005/TCP               123m
+sock-shop              carts                       ClusterIP   10.101.42.65     <none>        80/TCP                       123m
+sock-shop              carts-db                    ClusterIP   10.105.227.49    <none>        27017/TCP                    123m
+sock-shop              catalogue                   ClusterIP   10.96.204.146    <none>        80/TCP                       123m
+sock-shop              catalogue-db                ClusterIP   10.111.104.99    <none>        3306/TCP                     123m
+sock-shop              front-end                   NodePort    10.104.217.196   <none>        80:30004/TCP                 123m
+sock-shop              orders                      ClusterIP   10.100.180.224   <none>        80/TCP                       123m
+sock-shop              orders-db                   ClusterIP   10.107.153.61    <none>        27017/TCP                    123m
+sock-shop              payment                     ClusterIP   10.107.94.70     <none>        80/TCP                       123m
+sock-shop              queue-master                ClusterIP   10.100.222.80    <none>        80/TCP                       123m
+sock-shop              rabbitmq                    ClusterIP   10.102.254.17    <none>        5672/TCP                     123m
+sock-shop              shipping                    ClusterIP   10.103.93.89     <none>        80/TCP                       123m
+sock-shop              user                        ClusterIP   10.101.204.165   <none>        80/TCP                       123m
+sock-shop              user-db                     ClusterIP   10.101.77.230    <none>        27017/TCP                    123m
+
+ubuntu@master1:~$ kubectl describe secret -n kubernetes-dashboard kubernetes-dashboard
 ```
+
+11. (Optional) Access Kubernetes Dashboard using one of the servers ips, https://10.206.42.218:30005 with the secret retrieved from the previous step.
