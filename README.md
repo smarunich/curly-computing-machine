@@ -155,54 +155,81 @@ Enter a value: yes
 Apply complete! Resources: 40 added, 0 changed, 0 destroyed.
 
 Outputs:
-Controller_PublicIP = [
-"54.188.71.166",
-"54.185.115.180",
+controllers = [
+  "10.206.42.224",
+  "10.206.42.230",
 ]
-Jumpbox_PublicIP = 54.202.241.121
-Master_PublicIP = [
-"34.213.245.110",
-"34.221.24.201",
-]
-8. Review the environment details
-aviadmin@avitools:~/curly-computing-machine# terraform output
- Controller_PublicIP = [
-"54.188.71.166",
-"54.185.115.180",
-]
-Jumpbox_PublicIP = 54.202.241.121
-Master_PublicIP = [
-"34.213.245.110",
-"34.221.24.201",
+jumpbox = 10.206.42.231
+masters = [
+  "10.206.42.223",
+  "10.206.42.222",
 ]
 ```
 9. SSH into the environment
 ```
  aviadmin@avitools:~/curly-computing-machine# ls keys/
-generated-access-key-polecat.pem  generated-access-key-polecat.pub
- aviadmin@avitools:~/curly-computing-machine# ssh -i keys/generated-access-key-polecat.pem 54.202.241.121 -l ubuntu
+generated-access-key-kid.pem  generated-access-key-kid.pub
+ aviadmin@avitools:~/curly-computing-machine# ssh -i keys/generated-access-key-kid.pem 10.206.42.231 -l ubuntu
  ```
 10. (Optional) Check the registered inventory
 ```
 ubuntu@jumpbox:~$ cat /etc/hosts
-...
-172.20.0.202	jumpbox.pod.lab
-54.202.241.121	public.jumpbox.pod.lab
-172.20.1.157	master1.pod2.lab
-34.221.24.201	public.master1.pod2.lab
-172.20.1.127	server2.pod2.lab
-50.112.180.171	public.server2.pod2.lab
-172.20.1.134	master1.pod1.lab
-34.213.245.110	public.master1.pod1.lab
-172.20.1.244	server2.pod1.lab
-52.43.221.124	public.server2.pod1.lab
-172.20.1.30	server1.pod2.lab
-54.185.175.111	public.server1.pod2.lab
-172.20.0.31	controller.pod2.lab
-54.185.115.180	public.controller.pod2.lab
-172.20.0.130	controller.pod1.lab
-54.188.71.166	public.controller.pod1.lab
-172.20.1.247	server1.pod1.lab
-54.201.30.215	public.server1.pod1.lab
-ubuntu@jumpbox:~$ /etc/ansible/hosts --list
+127.0.0.1	localhost
+fe00::0	ip6-localnet
+ff00::0	ip6-mcastprefix
+ff02::1	ip6-allnodes
+ff02::2	ip6-allrouters
+ff02::3	ip6-allhosts
+10.206.42.231	jumpbox.pod.lab
+10.206.42.230	controller.pod2.lab
+10.206.42.224	controller.pod1.lab
+10.206.42.222	master1.pod2.lab
+10.206.42.223	master1.pod1.lab
+10.206.42.219	server1.pod2.lab
+10.206.42.216	server2.pod2.lab
+10.206.42.218	server3.pod1.lab
+10.206.42.217	server2.pod1.lab
+10.206.42.212	server1.pod1.lab
+10.206.42.209	server3.pod2.lab
+
+ubuntu@jumpbox:~$ /etc/ansible/hosts --list | jq . | more
+{
+  "_meta": {
+    "hostvars": {
+      "controller.pod2.lab": {
+        "dynamicType": "None",
+        "dynamicProperty": "[]",
+        "toolsStatus": "toolsOk",
+        "toolsVersionStatus": "guestToolsUnmanaged",
+        "toolsVersionStatus2": "guestToolsUnmanaged",
+        "toolsRunningStatus": "guestToolsRunning",
+        "toolsVersion": "10304",
+        "toolsInstallType": "guestToolsTypeOpenVMTools",
+        "guestId": "ubuntu64Guest",
+        "guestFamily": "linuxGuest",
+        "guestFullName": "Ubuntu Linux (64-bit)",
+        "hostName": "Avi-Controller",
+        "ipAddress": "10.206.42.230",
+        "guestState": "running",
+        "appHeartbeatStatus": "appStatusGray",
+        "guestKernelCrashed": "False",
+        "appState": "none",
+        "guestOperationsReady": "True",
+        "interactiveGuestOperationsReady": "False",
+        "guestStateChangeSupported": "True",
+        "generationInfo": "[]",
+        "hwVersion": "None",
+        "_vimtype": "vim.vm.GuestInfo",
+        "vmId": "vm-1751",
+        "now": "2020-04-30T18:06:01.474731",
+        "localhostname": "jumpbox.pod.lab",
+        "network": "vxw-dvs-34-virtualwire-3-sid-6100002-wdc-06-vc10-avi-mgmt",
+        "Lab_Timezone": "EST",
+        "ansible_connection": "local",
+        "Lab_Group": "controllers",
+        "Lab_Id": "enable",
+        "Lab_Name": "controller.pod2.lab",
+        "Owner": "aviVMware_Training",
+        "Name": "controller.pod2.lab"
+      },
 ```
