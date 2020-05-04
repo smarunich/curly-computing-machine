@@ -80,7 +80,7 @@
     pod_id: "{{ inventory_hostname | regex_replace('^controller.pod(\\d+).lab', '\\1') }}"
     pod_domain: "{{ inventory_hostname | regex_replace('controller.','') }}"
 
-- name: Define IPAM Profile
+- name: Define IPAM Profile (<18.2.6)
   import_role:
     name: avinetworks.aviconfig
   vars:
@@ -112,6 +112,41 @@
                 pass_through: true
             ttl: 30
           type: IPAMDNS_TYPE_INTERNAL_DNS
+  ignore_errors: true
+
+- name: Define IPAM Profile (18.2.8+)
+  import_role:
+    name: avinetworks.aviconfig
+  vars:
+    avi_credentials: "{{ avi_credentials }}"
+    avi_config:
+      ipamdnsproviderprofile:
+        - name: ipam
+          infoblox_profile:
+            dns_view: default
+            ip_address:
+              addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
+              type: V4
+            network_view: default
+            usable_alloc_subnets:
+            - subnet:
+                ip_addr:
+                  addr: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[0] }}"
+                  type: V4
+                mask: "{{ hostvars['jumpbox.pod.lab']['Lab_vip_ipam_cidr'].split('/')[1] }}"
+            username: admin
+            password: admin
+            wapi_version: '2.0'
+          type: IPAMDNS_TYPE_INFOBLOX
+        - name: dns
+          internal_profile:
+            dns_service_domain:
+              - num_dns_ip: 1
+                domain_name: "app.{{ pod_domain }}"
+                pass_through: true
+            ttl: 30
+          type: IPAMDNS_TYPE_INTERNAL_DNS
+  ignore_errors: true
 
 - name: VMware Cloud Connector Setup
   avi_cloud:
