@@ -29,7 +29,7 @@ variable "controller" {
     cpu = 8
     memory = 24768
     disk = 128
-    template = "controller-18.2.6-9134-template"
+    template = "controller-18.2.8-9205-template"
   # mgmt_ip = ""
   # mgmt_mask = ""
   # default_gw = ""

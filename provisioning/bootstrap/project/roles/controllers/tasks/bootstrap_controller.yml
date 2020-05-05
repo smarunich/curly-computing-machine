@@ -255,4 +255,4 @@
     avi_credentials: "{{ avi_credentials }}"
     avi_api_update_method: patch
     avi_api_patch_op: replace
-    dns_virtualservice_refs: "/api/virtualservice/?name=vs_dns }}"
+    dns_virtualservice_refs: "/api/virtualservice/?name=vs_dns"
