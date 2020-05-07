@@ -1,4 +1,9 @@
 ---
+- name: Allow everything and enable UFW
+  ufw:
+    state: disabled
+    policy: allow
+  ignore_errors: yes
 - copy:
     src: /home/ubuntu/.ssh/id_rsa
     dest: /home/aviadmin/.ssh/id_rsa

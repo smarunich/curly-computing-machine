@@ -1,4 +1,9 @@
 ---
+- name: Allow everything and disable UFW
+  ufw:
+    state: disabled
+    policy: allow
+  ignore_errors: yes
 - file:
     path: /etc/resolv.conf
     state: absent
