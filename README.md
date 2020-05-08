@@ -1,45 +1,45 @@
-# curly-computing-machine
+# curly-computing-machine - NSX Advanced Load Balancer by Avi Networks on top of vSphere using Terraform + Ansible
 
-## Solution Overview
+## Overview
 
 Extensible deployment framework starting from the infrastructure layer covered by Terraform up to the configuration management handled by Ansible.
 
-The current repo deploys n-number of target K8S pods with VMware NSX Advanced Load Balancer (Avi Networks) as Ingress Controller on top of vSphere.
+The current repository deploys n-number of target K8S pods with VMware NSX Advanced Load Balancer (Avi Networks) as Ingress Controller on top of vSphere leveraging [AKO (Avi Kubernetes Operator)](https://avinetworks.com/docs/ako/ako-installation/) .
 
 ## Topology
 
 ![Topology](curly-computing-machine.png)
 
-### Applications
+### Kubernetes Deployments are reachable via Node Port, LoadBalancer and Ingress objects
 
-Applications available via Node Ports on Servers. Ingress automation is available optionally.
+LoadBalancer, Ingress are also provided leveraging NSX Advanced Load Balancer and AKO.
 
-  - KUARD - Port 30000
-  - avinetworks - Port 30001
-  - httpbin - Port 30002
-  - juice - Port 30003
-  - sock-shop - Port 30004
-  - hackazon - Port 30080, Port 30443 (SSL)
-  - kubernetes-dashboard - Port 30005
-  - dvwa - Port 30081
-  - jupyter - Port 30082
+| Application Name | Node Port | Description |
+| -------- | -------- | -------- |
+| kuard     | HTTP/30000     | https://github.com/kubernetes-up-and-running/kuard |
+| avinetworks     | HTTP/30001     | https://hub.docker.com/r/smarunich/avinetworks-demo |
+| httpbin     | HTTP/30002     | https://httpbin.org/ |
+| juice     | HTTP/30003     | https://owasp.org/www-project-juice-shop/ |
+| sock-shop     | HTTP/30004     | https://github.com/microservices-demo/microservices-demo |
+| kubernetes-dashboard    | HTTP2/30005     | https://github.com/kubernetes/dashboard |
+| hackazon    | HTTP/30080, HTTPS/30443     | https://github.com/rapid7/hackazon |
+| dvwa    | HTTP/30081     | http://www.dvwa.co.uk/ |
 
 ## Requirements
+* Terraform 0.12.10 or later
+* Ansible 2.6 or later
+* vCenter Server vSphere 6.5 or later
+* Ubuntu Bionic Template as part of vCenter. Ubuntu VM template has to support user-data, please download official Ubuntu OVA image from https://cloud-images.ubuntu.com/bionic/current/
+* Avi Controller Template 18.2.6 or later as part of vCenter.
+* DHCP is required for Management Port Group to bootstrap the virtual machines as well as Internet connectivity
 
- - Terraform >= 0.12.10
- - Ansible >= 2.9.2
- - vCenter (tested starting 6.5+)
- - Ubuntu OVA image imported as VM template. Ubuntu VM template has to support user-data, please download official Ubuntu OVA image from https://cloud-images.ubuntu.com/bionic/current/
- - Avi Controller image (18.2.6+) imported as VM template
- - DHCP is required for Management Port Group to bootstrap the virtual machines as well as Internet connectivity
-
-     **NOTE**: all the deployment work was performed within avitools container: [https://github.com/avinetworks/avitools](https://github.com/avinetworks/avitools)
 
 ## Getting Started
+   
+   **NOTE**: all the deployment work is suggested to be performed within avitools container: [https://github.com/avinetworks/avitools](https://github.com/avinetworks/avitools)
 
-      **NOTE**: all the deployment work was performed within avitools container: [https://github.com/avinetworks/avitools](https://github.com/avinetworks/avitools)
 
- 1. Clone the repository - [https://github.com/smarunich/curly-computing-machine](https://github.com/smarunich/curly-computing-machine)
+ 1. Clone the repository [https://github.com/smarunich/curly-computing-machine](https://github.com/smarunich/curly-computing-machine)
 
 ```
 root@avitools:~# git clone https://github.com/smarunich/curly-computing-machine
