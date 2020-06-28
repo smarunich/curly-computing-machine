@@ -225,7 +225,7 @@
   avi_api_session:
     avi_credentials: "{{ avi_credentials }}"
     http_method: get
-    path: "virtualservice?include_name&services.0.port=53"
+    path: "vsvip?name=vsvip_dns"
   register: dns_vs
 
 - set_fact:
