@@ -37,7 +37,7 @@
     welcome_workflow_complete: true
     dns_configuration:
       server_list:
-        - addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
+        - addr: "{{ hostvars['jumpbox.pod.lab']['ip_address'] }}"
           type: V4
         - addr: 8.8.4.4
           type: V4
@@ -101,7 +101,7 @@
             password: admin
             ip_address:
               type: V4
-              addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
+              addr: "{{ hostvars['jumpbox.pod.lab']['ip_address'] }}"
           type: IPAMDNS_TYPE_INFOBLOX
           name: ipam
         - name: dns
@@ -125,7 +125,7 @@
           infoblox_profile:
             dns_view: default
             ip_address:
-              addr: "{{ hostvars['jumpbox.pod.lab']['ipAddress'] }}"
+              addr: "{{ hostvars['jumpbox.pod.lab']['ip_address'] }}"
               type: V4
             network_view: default
             usable_alloc_subnets:

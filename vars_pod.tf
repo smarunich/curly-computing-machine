@@ -84,7 +84,7 @@ variable "lab_timezone" {
 
 # depends on the underlay lab environment, it can take longer than 2 minutes for VM to come up and get IP address by DHCP
 variable "wait_for_guest_net_timeout" {
-  default = "2"
+  default = "5"
 }
 
 variable "vip_ipam_cidr" {

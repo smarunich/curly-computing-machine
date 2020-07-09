@@ -77,8 +77,8 @@
       state: restarted
       name: rsyslog
   - copy:
-      src: ../provisioning/handle_register.py
-      dest: /usr/local/bin/handle_register.py
+      src: ../provisioning/handle_vm_register.py
+      dest: /usr/local/bin/handle_vm_register.py
   - copy:
       src: ../provisioning/handle_register.service
       dest: /etc/systemd/system/handle_register.service
@@ -168,5 +168,5 @@
       daemon_reload: yes
       name: handle_ipam
 
-  - shell: "/usr/local/bin/register.py 127.0.0.1 {{ vcenter_host }} {{ vcenter_user }} {{ vcenter_password }} {{ vm_name }}"
-    register: register
+#   - shell: "/usr/local/bin/register.py 127.0.0.1 {{ vcenter_host }} {{ vcenter_user }} {{ vcenter_password }} {{ vm_name }}"
+#     register: register

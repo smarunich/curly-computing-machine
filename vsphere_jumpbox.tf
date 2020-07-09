@@ -6,6 +6,10 @@ data "template_file" "jumpbox_userdata" {
     password     = var.avi_admin_password
     pkey         = tls_private_key.generated.private_key_pem
     pubkey       = tls_private_key.generated.public_key_openssh
+    vcenter_host      = var.vsphere_server
+    vcenter_user      = var.vsphere_user
+    vcenter_password  = var.vsphere_password
+    projectid = var.id
   }
 }
 
