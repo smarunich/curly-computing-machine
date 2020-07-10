@@ -78,10 +78,10 @@ class vcenter_inventory():
         self.session.post(self.vcenter_url + '/com/vmware/cis/session')
 
     def collect(self):
-        network_check = self._vm_get('/guest/identity')
+        network_check = self._get('/vcenter/vm/' + self.vm_id + '/guest/identity')
         status = network_check.status_code
         while status != 200:
-            network_check = self._vm_get('/guest/identity')
+            network_check = self._get('/vcenter/vm/' + self.vm_id + '/guest/identity')
             status = network_check.status_code
         self.identity.update(network_check.json()['value'])
         self.identity['vmId'] = self.vm_id
@@ -89,8 +89,8 @@ class vcenter_inventory():
         self.tag_parse()
         return(self.identity)
     
-    def _vm_get(self, api_path):
-        resp = self.session.get('https://' + self.vcenter_server + '/rest/vcenter/vm/' + self.vm_id  + api_path)
+    def _get(self, api_path):
+        resp = self.session.get(self.vcenter_url + api_path)
         return(resp)
 
     #tag serialization
@@ -149,12 +149,7 @@ client = SmartConnectNoSSL(host=vcenter_host,
 
 #event collection vars
 event_type_list = ['VmPoweredOnEvent','DrsVmPoweredOnEvent']
-# time_filter = vim.event.EventFilterSpec.ByTime()
-# current = client.CurrentTime()
-# now = current.replace(tzinfo=None)
-# time_filter.beginTime = now - timedelta(minutes=15)
-# time_filter.endTime = now
-# filter_spec = vim.event.EventFilterSpec(eventTypeId=event_type_list,time=time_filter)
+
 filter_spec = vim.event.EventFilterSpec(eventTypeId=event_type_list)
 collect_events  = client.content.eventManager.CreateCollectorForEvents(filter=filter_spec)
 
@@ -165,26 +160,23 @@ session.auth = (vcenter_user,vcenter_password)
 
 try:
     while True:
-        #query within updated timeframe
-        # current = client.CurrentTime()
-        # now = current.replace(tzinfo=None)
-        # time_filter.beginTime = now - timedelta(minutes=10)
-        # time_filter.endTime = now
-
         #loop through events
         for event in reversed(collect_events.latestPage):
             if last_event_key < event.key:
                 login = vcenter_inventory(session,event,vcenter_host)
-                check_vm_power = login._vm_get('/power')
-                if check_vm_power.status_code == 200 and check_vm_power.json()['value']['state'] == "POWERED_ON":
-                    inv_collection = login.collect()
-                    host_inv = redis_inventory()
-                    in_redis = host_inv.check_redis(inv_collection['host_name'])
-                    #execute when host not found in redis
-                    if not bool(in_redis):
-                        hosts_file(inv_collection['ip_address'], inv_collection['Lab_Name'])
-                        host_inv.update_redis(inv_collection)
-                        host_inv.publish_redis('bootstrap',inv_collection['Lab_Name'])
+                folder = login._get('/vcenter/folder?filter.names=' + id_name).json()['value'][0]['folder']
+                check_vm = login._get('/vcenter/vm?filter.names=' + event.vm.name + '&filter.folders=' + folder)
+                check_vm_length = len(check_vm.json()['value'])
+                if check_vm_length != 0 and check_vm.status_code == 200:
+                    if check_vm.json()['value'][0]['power_state'] == "POWERED_ON":
+                        inv_collection = login.collect()
+                        host_inv = redis_inventory()
+                        in_redis = host_inv.check_redis(inv_collection['host_name'])
+                        #execute when host not found in redis
+                        if not bool(in_redis):
+                            hosts_file(inv_collection['ip_address'], inv_collection['Lab_Name'])
+                            host_inv.update_redis(inv_collection)
+                            host_inv.publish_redis('bootstrap',inv_collection['Lab_Name'])
                 last_event_key = event.key
         sleep(float(interval))
 except KeyboardInterrupt:
