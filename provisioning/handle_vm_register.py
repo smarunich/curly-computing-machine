@@ -5,7 +5,7 @@ import json
 import sys
 import redis
 from time import sleep
-import os, logging
+import os
 import psutil
 import signal
 from pyVim.connect import SmartConnectNoSSL
@@ -132,15 +132,11 @@ class redis_inventory():
         return(self.redis.hgetall(vm_hostname))
     
     def publish_redis(self,channel,pdata):
-        self.redis.publish(channel,json.dumps({'bootstrap':pdata}))
+        self.redis.publish(channel,json.dumps({channel:pdata}))
 
 #global vars
-interval = 25
+interval = 30
 last_event_key = 0
-
-logging.basicConfig()
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
 
 #host vars
 vcenter_host = sys.argv[1]
@@ -152,25 +148,28 @@ client = SmartConnectNoSSL(host=vcenter_host,
                         pwd=vcenter_password)
 
 #event collection vars
-time_filter = vim.event.EventFilterSpec.ByTime()
 event_type_list = ['VmPoweredOnEvent','DrsVmPoweredOnEvent']
+# time_filter = vim.event.EventFilterSpec.ByTime()
+# current = client.CurrentTime()
+# now = current.replace(tzinfo=None)
+# time_filter.beginTime = now - timedelta(minutes=15)
+# time_filter.endTime = now
+# filter_spec = vim.event.EventFilterSpec(eventTypeId=event_type_list,time=time_filter)
+filter_spec = vim.event.EventFilterSpec(eventTypeId=event_type_list)
+collect_events  = client.content.eventManager.CreateCollectorForEvents(filter=filter_spec)
 
 #requests session vars
 session = requests.Session()
 session.verify = False
 session.auth = (vcenter_user,vcenter_password)
 
-host_inv = redis_inventory()
-
 try:
     while True:
         #query within updated timeframe
-        current = client.CurrentTime()
-        now = current.replace(tzinfo=None)
-        time_filter.beginTime = now - timedelta(minutes=30)
-        time_filter.endTime = now
-        filter_spec = vim.event.EventFilterSpec(eventTypeId=event_type_list,time=time_filter)
-        collect_events  = client.content.eventManager.CreateCollectorForEvents(filter=filter_spec)
+        # current = client.CurrentTime()
+        # now = current.replace(tzinfo=None)
+        # time_filter.beginTime = now - timedelta(minutes=10)
+        # time_filter.endTime = now
 
         #loop through events
         for event in reversed(collect_events.latestPage):
@@ -178,12 +177,11 @@ try:
                 login = vcenter_inventory(session,event,vcenter_host)
                 check_vm_power = login._vm_get('/power')
                 if check_vm_power.status_code == 200 and check_vm_power.json()['value']['state'] == "POWERED_ON":
-                    log.debug('handle_register detects Power on Event for' + event.vm.name)
                     inv_collection = login.collect()
+                    host_inv = redis_inventory()
                     in_redis = host_inv.check_redis(inv_collection['host_name'])
                     #execute when host not found in redis
                     if not bool(in_redis):
-                        log.debug('handle_register adding vm' + inv_collection['host_name'])
                         hosts_file(inv_collection['ip_address'], inv_collection['Lab_Name'])
                         host_inv.update_redis(inv_collection)
                         host_inv.publish_redis('bootstrap',inv_collection['Lab_Name'])

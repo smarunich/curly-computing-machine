@@ -21,6 +21,12 @@
   ignore_errors: yes
   changed_when: "kubeadm_config.rc != 0"
 - block:
+  - name: Wait apt lock to clear
+    become: true
+    shell: while sudo fuser /var/lib/dpkg/{{ item }} >/dev/null 2>&1; do sleep 1; done;
+    with_items:
+      - lock
+      - lock-frontend
   - apt_key:
       url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
       id: "0x6A030B21BA07F4FB"
