@@ -69,20 +69,22 @@ class hosts_file(object):
                 break
 
 class vcenter_inventory():
-    def __init__(self, session, event, vcenter_server):
+    def __init__(self, session,vcenter_server):
         self.vcenter_server = vcenter_server
-        self.vm_id = str(event.vm.vm).split(':')[1].replace('\'','')
         self.session = session
         self.identity = {}
         self.vcenter_url = 'https://' + self.vcenter_server + '/rest'
         self.session.post(self.vcenter_url + '/com/vmware/cis/session')
 
     def collect(self):
+        self.vm_id = str(event.vm.vm).split(':')[1].replace('\'','')
+        self.id_prefix = id_prefix
         network_check = self._get('/vcenter/vm/' + self.vm_id + '/guest/identity')
         status = network_check.status_code
         while status != 200:
             network_check = self._get('/vcenter/vm/' + self.vm_id + '/guest/identity')
             status = network_check.status_code
+            sleep(5)
         self.identity.update(network_check.json()['value'])
         self.identity['vmId'] = self.vm_id
         self.identity['now'] = datetime.now().isoformat()
@@ -111,6 +113,7 @@ class vcenter_inventory():
             resp = self.session.get(
                     vcenter_url_get_category.format(category_id))
             tag_name = resp.json()['value']['name']
+            tag_name = tag_name.replace(self.id_prefix+'_', "")
             self.identity[tag_name] = tag_value
 
 class redis_inventory():
@@ -163,14 +166,14 @@ try:
         #loop through events
         for event in reversed(collect_events.latestPage):
             if last_event_key < event.key:
-                login = vcenter_inventory(session,event,vcenter_host)
+                login = vcenter_inventory(session,vcenter_host)
                 folder = login._get('/vcenter/folder?filter.names=' + id_name).json()['value'][0]['folder']
                 vm_id = str(event.vm.vm).split(':')[1].replace('\'','')
                 check_vm = login._get('/vcenter/vm?filter.names=' + event.vm.name + '&filter.vms=' + vm_id  + '&filter.folders=' + folder)
                 check_vm_length = len(check_vm.json()['value'])
                 if check_vm_length != 0 and check_vm.status_code == 200:
                     if check_vm.json()['value'][0]['power_state'] == "POWERED_ON":
-                        inv_collection = login.collect()
+                        inv_collection = login.collect(event,id_name)
                         host_inv = redis_inventory()
                         in_redis = host_inv.check_redis(inv_collection['host_name'])
                         #execute when host not found in redis
