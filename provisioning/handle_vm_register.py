@@ -165,7 +165,8 @@ try:
             if last_event_key < event.key:
                 login = vcenter_inventory(session,event,vcenter_host)
                 folder = login._get('/vcenter/folder?filter.names=' + id_name).json()['value'][0]['folder']
-                check_vm = login._get('/vcenter/vm?filter.names=' + event.vm.name + '&filter.folders=' + folder)
+                vm_id = str(event.vm.vm).split(':')[1].replace('\'','')
+                check_vm = login._get('/vcenter/vm?filter.names=' + event.vm.name + '&filter.vms=' + vm_id  + '&filter.folders=' + folder)
                 check_vm_length = len(check_vm.json()['value'])
                 if check_vm_length != 0 and check_vm.status_code == 200:
                     if check_vm.json()['value'][0]['power_state'] == "POWERED_ON":
