@@ -29,7 +29,7 @@ resource "vsphere_folder" "folder" {
 }
 
 resource "vsphere_tag_category" "name" {
-  name = "Name"
+  name = "${var.id}_Name"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -37,7 +37,7 @@ resource "vsphere_tag_category" "name" {
 }
 
 resource "vsphere_tag_category" "owner" {
-  name = "Owner"
+  name = "${var.id}_Owner"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -45,7 +45,7 @@ resource "vsphere_tag_category" "owner" {
 }
 
 resource "vsphere_tag_category" "lab_group" {
-  name = "Lab_Group"
+  name = "${var.id}_Lab_Group"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -53,7 +53,7 @@ resource "vsphere_tag_category" "lab_group" {
 }
 
 resource "vsphere_tag_category" "lab_name" {
-  name = "Lab_Name"
+  name = "${var.id}_Lab_Name"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -61,7 +61,7 @@ resource "vsphere_tag_category" "lab_name" {
 }
 
 resource "vsphere_tag_category" "lab_id" {
-  name = "Lab_Id"
+  name = "${var.id}_Lab_Id"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -69,7 +69,7 @@ resource "vsphere_tag_category" "lab_id" {
 }
 
 resource "vsphere_tag_category" "lab_avi_default_password" {
-  name = "Lab_avi_default_password"
+  name = "${var.id}_Lab_avi_default_password"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -77,7 +77,7 @@ resource "vsphere_tag_category" "lab_avi_default_password" {
 }
 
 resource "vsphere_tag_category" "lab_avi_admin_password" {
-  name = "Lab_avi_admin_password"
+  name = "${var.id}_Lab_avi_admin_password"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -85,7 +85,7 @@ resource "vsphere_tag_category" "lab_avi_admin_password" {
 }
 
 resource "vsphere_tag_category" "lab_avi_backup_admin_username" {
-  name = "Lab_avi_backup_admin_username"
+  name = "${var.id}_Lab_avi_backup_admin_username"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -93,7 +93,7 @@ resource "vsphere_tag_category" "lab_avi_backup_admin_username" {
 }
 
 resource "vsphere_tag_category" "lab_avi_backup_admin_password" {
-  name = "Lab_avi_backup_admin_password"
+  name = "${var.id}_Lab_avi_backup_admin_password"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -101,7 +101,7 @@ resource "vsphere_tag_category" "lab_avi_backup_admin_password" {
 }
 
 resource "vsphere_tag_category" "lab_timezone" {
-  name = "Lab_Timezone"
+  name = "${var.id}_Lab_Timezone"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -109,7 +109,7 @@ resource "vsphere_tag_category" "lab_timezone" {
 }
 
 resource "vsphere_tag_category" "lab_vcenter_host" {
-  name = "Lab_vcenter_host"
+  name = "${var.id}_Lab_vcenter_host"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -118,7 +118,7 @@ resource "vsphere_tag_category" "lab_vcenter_host" {
 
 
 resource "vsphere_tag_category" "lab_vcenter_user" {
-  name = "Lab_vcenter_user"
+  name = "${var.id}_Lab_vcenter_user"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -126,7 +126,7 @@ resource "vsphere_tag_category" "lab_vcenter_user" {
 }
 
 resource "vsphere_tag_category" "lab_vcenter_password" {
-  name = "Lab_vcenter_id"
+  name = "${var.id}_Lab_vcenter_id"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -134,7 +134,7 @@ resource "vsphere_tag_category" "lab_vcenter_password" {
 }
 
 resource "vsphere_tag_category" "lab_dc" {
-  name = "Lab_dc"
+  name = "${var.id}_Lab_dc"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -142,7 +142,7 @@ resource "vsphere_tag_category" "lab_dc" {
 }
 
 resource "vsphere_tag_category" "lab_dns_server" {
-  name = "Lab_dns_server"
+  name = "${var.id}_Lab_dns_server"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -150,7 +150,7 @@ resource "vsphere_tag_category" "lab_dns_server" {
 }
 
 resource "vsphere_tag_category" "lab_vip_ipam_cidr" {
-  name = "Lab_vip_ipam_cidr"
+  name = "${var.id}_Lab_vip_ipam_cidr"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
@@ -158,7 +158,7 @@ resource "vsphere_tag_category" "lab_vip_ipam_cidr" {
 }
 
 resource "vsphere_tag_category" "ansible_connection" {
-  name = "ansible_connection"
+  name = "${var.id}_ansible_connection"
   cardinality = "SINGLE"
   associable_types = [
     "VirtualMachine",
