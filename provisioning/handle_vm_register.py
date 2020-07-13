@@ -76,7 +76,7 @@ class vcenter_inventory():
         self.vcenter_url = 'https://' + self.vcenter_server + '/rest'
         self.session.post(self.vcenter_url + '/com/vmware/cis/session')
 
-    def collect(self):
+    def collect(self,event,id_prefix):
         self.vm_id = str(event.vm.vm).split(':')[1].replace('\'','')
         self.id_prefix = id_prefix
         network_check = self._get('/vcenter/vm/' + self.vm_id + '/guest/identity')
