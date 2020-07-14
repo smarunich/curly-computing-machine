@@ -28,6 +28,14 @@ resource "vsphere_folder" "folder" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
+resource "vsphere_tag_category" "network" {
+  name = "${var.id}_network"
+  cardinality = "SINGLE"
+  associable_types = [
+    "VirtualMachine",
+  ]
+}
+
 resource "vsphere_tag_category" "name" {
   name = "${var.id}_Name"
   cardinality = "SINGLE"
@@ -184,4 +192,9 @@ resource "vsphere_tag" "lab_timezone" {
 resource "vsphere_tag" "ansible_connection_local" {
   name             = "local"
   category_id      = vsphere_tag_category.ansible_connection.id
+}
+
+resource "vsphere_tag" "network" {
+  name             = var.network
+  category_id      = vsphere_tag_category.network.id
 }
