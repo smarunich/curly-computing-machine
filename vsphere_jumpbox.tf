@@ -121,7 +121,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
         vsphere_tag.jumpbox_lab_group.id,
         vsphere_tag.owner.id,
         vsphere_tag.lab_id.id,
-        vsphere_tag.network,
+        vsphere_tag.network.id,
 
         vsphere_tag.lab_avi_default_password.id,
         vsphere_tag.lab_avi_admin_password.id,
