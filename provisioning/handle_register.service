@@ -8,7 +8,7 @@ EnvironmentFile=/usr/local/bin/.vcenter.txt
 Type=simple
 User=root
 Group=root
-ExecStart=/usr/bin/python3 /usr/local/bin/handle_vm_register.py $VCENTER_SERVER $VCENTER_USER $VCENTER_PASSWORD $LAB
+ExecStart=/usr/bin/python3 /usr/local/bin/handle_register.py --host $VCENTER_SERVER --username $VCENTER_USER --password $VCENTER_PASSWORD --id $LAB
 
 # Give the script some time to startup
 TimeoutSec=300
