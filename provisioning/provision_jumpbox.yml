@@ -77,8 +77,8 @@
       state: restarted
       name: rsyslog
   - copy:
-      src: ../provisioning/handle_vm_register.py
-      dest: /usr/local/bin/handle_vm_register.py
+      src: ../provisioning/handle_register.py
+      dest: /usr/local/bin/handle_register.py
   - copy:
       src: ../provisioning/handle_register.service
       dest: /etc/systemd/system/handle_register.service
