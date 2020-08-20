@@ -33,6 +33,14 @@ write_files:
     permissions: 0755
 
   - content: |
+      VCENTER_SERVER=${vcenter_host}
+      VCENTER_USER=${vcenter_user}
+      VCENTER_PASSWORD=${vcenter_password}
+      LAB=${projectid}
+    path: /usr/local/bin/.vcenter.txt
+    permissions: 0700
+
+  - content: |
       ubuntu ALL=(ALL) NOPASSWD:ALL
     path: /etc/sudoers.d/ubuntu
 

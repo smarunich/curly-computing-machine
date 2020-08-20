@@ -167,6 +167,3 @@
       state: restarted
       daemon_reload: yes
       name: handle_ipam
-
-  - shell: "/usr/local/bin/register.py 127.0.0.1 {{ vcenter_host }} {{ vcenter_user }} {{ vcenter_password }} {{ vm_name }}"
-    register: register

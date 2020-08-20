@@ -6,6 +6,10 @@ data "template_file" "jumpbox_userdata" {
     password     = var.avi_admin_password
     pkey         = tls_private_key.generated.private_key_pem
     pubkey       = tls_private_key.generated.public_key_openssh
+    vcenter_host      = var.vsphere_server
+    vcenter_user      = var.vsphere_user
+    vcenter_password  = var.vsphere_password
+    projectid = var.id
   }
 }
 
@@ -117,6 +121,7 @@ resource "vsphere_virtual_machine" "jumpbox" {
         vsphere_tag.jumpbox_lab_group.id,
         vsphere_tag.owner.id,
         vsphere_tag.lab_id.id,
+        vsphere_tag.network.id,
 
         vsphere_tag.lab_avi_default_password.id,
         vsphere_tag.lab_avi_admin_password.id,

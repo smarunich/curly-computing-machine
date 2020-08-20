@@ -78,13 +78,6 @@ resource "vsphere_virtual_machine" "controller" {
     user        = "ubuntu"
     private_key = tls_private_key.generated.private_key_pem
   }
-
-  provisioner "remote-exec" {
-    inline      = [
-      "sudo rm -rf /opt/register_blocker",
-      "sudo /usr/local/bin/register.py 127.0.0.1 ${var.vsphere_server} ${var.vsphere_user} ${var.vsphere_password} ${self.name}"
-    ]
-  }
-
+  
   depends_on        = [ vsphere_virtual_machine.jumpbox ]
 }
