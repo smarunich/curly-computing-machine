@@ -16,6 +16,7 @@
 - template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
+    mode: '0644'
 - shell: kubeadm config view
   register: kubeadm_config
   ignore_errors: yes

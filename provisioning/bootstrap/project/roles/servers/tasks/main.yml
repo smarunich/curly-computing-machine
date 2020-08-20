@@ -10,6 +10,7 @@
 - template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
+    mode: '0644'
 - set_fact:
     k8s_master: "{{ inventory_hostname | regex_replace('server(\\d+)','master1') }}"
 - wait_for:
