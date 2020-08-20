@@ -37,7 +37,7 @@ write_files:
       VCENTER_USER=${vcenter_user}
       VCENTER_PASSWORD=${vcenter_password}
       LAB=${projectid}
-    path: /usr/local/bin/.vcenter.txt
+    path: /usr/local/bin/.vcenter.conf
     permissions: 0700
 
   - content: |
