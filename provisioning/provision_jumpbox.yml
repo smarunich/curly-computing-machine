@@ -89,6 +89,7 @@
   - copy:
       src: ../provisioning/handle_bootstrap.py
       dest: /usr/local/bin/handle_bootstrap.py
+      mode: 0755
   - copy:
       src: ../provisioning/handle_bootstrap.service
       dest: /etc/systemd/system/handle_bootstrap.service
@@ -112,6 +113,8 @@
   - copy:
       src: ../provisioning/bootstrap/
       dest: /opt/bootstrap/
+      group: ubuntu
+      mode: '0775'
   - replace:
       path: /etc/dnsmasq.conf
       regexp: "{{ item.regexp }}"
