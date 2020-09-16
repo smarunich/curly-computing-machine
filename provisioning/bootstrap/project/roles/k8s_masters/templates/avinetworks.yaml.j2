@@ -31,3 +31,18 @@ spec:
     port: 80
     nodePort: 30001
   type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: avinetworks
+spec:
+  rules:
+  - host: avinetworks.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: avinetworks
+          servicePort: 80
+

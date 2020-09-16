@@ -128,10 +128,11 @@
 
 - shell: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add stable https://kubernetes-charts.storage.googleapis.com/
+- shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add ako-incubator https://avinetworks.github.io/avi-helm-charts/charts/incubator/ako
 - shell: helm --kubeconfig /etc/kubernetes/admin.conf repo update
 
-- copy:
-    src: "{{ item }}"
+- template:
+    src: "{{ item }}.j2"
     dest: "/home/ubuntu/{{ item }}"
   loop:
     - kuard.yaml
@@ -141,8 +142,12 @@
     - sockshop.yaml
     - kubernetes-dashboard.yaml
     - hackazon.yaml
-    - dvwa.yaml
-    #-jupyter.yaml
+    - dvwa.yaml   
+    - values.yaml
+
+- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create ns avi-system
+- shell: helm --kubeconfig /etc/kubernetes/admin.conf install --devel ako/ako  --generate-name --version 1.2.1-9042-beta-2 -f /home/ubuntu/values.yaml --namespace=avi-system
+
 - shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/{{ item }}"
   loop:
     - kuard.yaml
@@ -153,4 +158,4 @@
     - kubernetes-dashboard.yaml
     - hackazon.yaml
     - dvwa.yaml
-      #-jupyter.yaml
+

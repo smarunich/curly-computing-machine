@@ -31,3 +31,17 @@ spec:
     port: 3000
     nodePort: 30003
   type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: juice
+spec:
+  rules:
+  - host: juice.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: juice
+          servicePort: 3000

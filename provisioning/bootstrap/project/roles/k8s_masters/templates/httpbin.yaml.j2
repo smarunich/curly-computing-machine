@@ -34,3 +34,17 @@ spec:
     port: 80
     nodePort: 30002
   type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: httpbin
+spec:
+  rules:
+  - host: httpbin.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: httpbin
+          servicePort: 80

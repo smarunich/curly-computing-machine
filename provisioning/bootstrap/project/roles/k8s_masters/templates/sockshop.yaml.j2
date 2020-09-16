@@ -1006,3 +1006,18 @@ items:
     loadBalancer: {}
 kind: List
 metadata: {}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sock-shop
+  namespace: sock-shop
+spec:
+  rules:
+  - host: sock-shop.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: sock-shop
+          servicePort: 80

@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kuard
+  name: kuard
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kuard
+  template:
+    metadata:
+      labels:
+        app: kuard
+    spec:
+      containers:
+      - name: kuard
+        image: gcr.io/kuar-demo/kuard-amd64:3
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kuard
+  name: kuard
+spec:
+  selector:
+    app: kuard
+  ports:
+  - protocol: TCP
+    port: 8080
+    nodePort: 30000
+  type: NodePort
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kuard-tls
+  namespace: default
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURrekNDQW51Z0F3SUJBZ0lVRElONHMvZm1VR2RoTVkwNVAzZWx6MUl0OVpRd0RRWUpLb1pJaHZjTkFRRUwKQlFBd1dURUxNQWtHQTFVRUJoTUNRMEV4Q3pBSkJnTlZCQWdNQWs5T01SQXdEZ1lEVlFRSERBZFViM0p2Ym5SdgpNUnN3R1FZRFZRUUtEQkpXVFhkaGNtVWdRMkZ1WVdSaElFbHVZeTR4RGpBTUJnTlZCQU1NQld0MVlYSmtNQjRYCkRUSXdNRGt4TmpFMk5ERXpNbG9YRFRJeE1Ea3hOakUyTkRFek1sb3dXVEVMTUFrR0ExVUVCaE1DUTBFeEN6QUoKQmdOVkJBZ01BazlPTVJBd0RnWURWUVFIREFkVWIzSnZiblJ2TVJzd0dRWURWUVFLREJKV1RYZGhjbVVnUTJGdQpZV1JoSUVsdVl5NHhEakFNQmdOVkJBTU1CV3QxWVhKa01JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBCk1JSUJDZ0tDQVFFQXVvb25aL1Q1ekVzY2tkTGVWWnBMTmYvRitaQXplZmZqVFMwaGNTNG1DV0xDTFJ0UzFhNncKMDQwenkrRTBmUWhvbk1rTjNYdFVrWXh5R0VjUUJKanlsemkyQXJURzhSTEVCSm01Y0VoNEJnRDB0SjhETlRaVQpSWFlrQlRiWnM3c0grUXpmcW9GaXZJaFBGUjl4NUxoMTNrU0hFdkVGOVlheGdDd3JzZmVFSHM4NVBFWDg0OVZyCmNuWmNhaHZMTTVYbmhHcjMwUGpxdWRTZEpyd0lJMHp3Q1o4OTgrRmZGMlQxS085TFNvUk01M05wWVdHUjIyVmQKMS9sK1dWdnAyUUM1QlV4ZnBLU0xnaUNYdnFZY29nbXdHbVFsQkc3ZHZLVnpkMnUxUlhidjNQRkI3VDI4V3M4awpENEp1Mmh6YzRad2w2SHY1STBpSVg3bWxBS2R0SDB0bE93SURBUUFCbzFNd1VUQWRCZ05WSFE0RUZnUVVlT29HCjdpS3dHYVpkdE41YWhNNmRhUm1xM0VVd0h3WURWUjBqQkJnd0ZvQVVlT29HN2lLd0dhWmR0TjVhaE02ZGFSbXEKM0VVd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQW5KNkNIK292YWtUUAovM2VCTmRqYjZhbGh4dEQxaGJsZzNNcDRjYmZ3NEFwUnB0dHRvRjViRFRoMUNrSnRwamRzZWZtWlB4eXhaK3B2Ckd4dGYrZ1Z4MVBHU3JiZ1RRRWl4VlNpZ09YTUdDc2QzZ2xKaFNpdjR4Wjd4RnYzWUk0ZVlTN3h5UEFSUkxmNkQKblpLOFJZd1dTbWs1UEpRMFZTMnlkZ1JoS3gxdWFTcTNFVmRFdURnL0FFRHZPcGRtaDdXaElyRlF6NzhxRVllMApabWk1eXhiay9STExPL1FXK3F0Z0VVejJza3dBUVJLMlc0Z0FvNGRhTmZ3MmtHU2VZUzBuT3RwYUdBMlpWWGdnCnNDWHc5enRHc1c5c1hRc21ZME1LdloxUFVoVmw1eXZoNVJvMHl1QXhVMGlWbjFGZmJzMkZaMGk2Y25UZGNxQ2kKaUlqdUw5UUdEQT09Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV3QUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktvd2dnU21BZ0VBQW9JQkFRQzZpaWRuOVBuTVN4eVIKMHQ1Vm1rczEvOFg1a0RONTkrTk5MU0Z4TGlZSllzSXRHMUxWcnJEVGpUUEw0VFI5Q0dpY3lRM2RlMVNSakhJWQpSeEFFbVBLWE9MWUN0TWJ4RXNRRW1ibHdTSGdHQVBTMG53TTFObFJGZGlRRk50bXp1d2Y1RE4rcWdXSzhpRThWCkgzSGt1SFhlUkljUzhRWDFockdBTEN1eDk0UWV6ems4UmZ6ajFXdHlkbHhxRzhzemxlZUVhdmZRK09xNTFKMG0KdkFnalRQQUpuejN6NFY4WFpQVW83MHRLaEV6bmMybGhZWkhiWlYzWCtYNVpXK25aQUxrRlRGK2twSXVDSUplKwpwaHlpQ2JBYVpDVUVidDI4cFhOM2E3VkZkdS9jOFVIdFBieGF6eVFQZ203YUhOemhuQ1hvZS9ralNJaGZ1YVVBCnAyMGZTMlU3QWdNQkFBRUNnZ0VCQUlVa2dMWGhrNzR1U21rRzRteWxJVk9jaVBqMDVOa0VocmVhSThsOXorWloKR0JGTDlGYlNSaUhwSWZRK2ZORlZoQjJNSDVwYkllUjFJeWFTNmlydDVCRHRpSFBzQmljaFpzbUYwMmNDUXJDKwpVK3JycUVWOXpxNTVnWUk3UVMzWXEvc21KaXEwQ1A1YUtHQUNQcStxdlc1MDZSZ3E4ajdwOFoxemFZaXdDeHhWClFadjZ1QXN5eExWeE5RTnFjL0pCc2hvNEh2enR2WEs4emxiZjJwMFA5RzlYbGlLa0FVaVJpaW5IcTdreW5oZE4KaXVvaktCbU9HUHhzQUlnSlBQbW9mQUlLbE0xOS9oQm5zeVI4clkrbGRObDVHWGVuUmhvcm9HTmgxdk1Vczl3UgplTUpnTnFDMXNTRFhwa2p0VnNKOUZBRTZ1MnNMc3FodXRlbGNXN2VkUkNFQ2dZRUE1OTNQc2d6YXBGaDJxd2FVCkYzVTlvaS84TWVIcXVDaFJJR3lUU2UzcjY5MERqRkFRem1xU0RwbFk5TkZlMnFtdEJaYTU4NGNOclkrZFU1aFMKSytVaXg5OGJncXR4Y3lFUTRrNGpXSGFaWjFpUjlablFHUzNwaWVIbTIzT1ZEV1p0Qm8ySnZXU3d6Y1hrdFZGUwpSOUp1eUdmNW8xZG10OTh6V2ttNGNBNU1ZTXNDZ1lFQXpmU1c1aVdKYm4yZXhJQjA1VXV1WWdwYmcycmNzRkc0CnVIRS84ZVRUMnJNdkFJRys5RVA0em5rMFd4N09LTTExamtTQUQxbHMrQ0hDdDFQYUcxNHpVYkVJTGU2S0xNdS8KdWdPQ3NlT0s3RWRPeWlrWi9vQTR3b0ltU1BOUlJGRkM5Qi9tMGxOc0Rvd3BLalhNZTZmVjcxbUo5MU9iTk5LaApiMWZ1SDVnaXIxRUNnWUVBd0xnVWthRXRlYnd0cGlscG5iWE03S21Gck5CaUQzOHpMd2dQeERzRkJKNUcvTER2Cnh5RzlGSFZSQXV1ak00d2tTNmprRmc0Q3lHZStGR1ZlcHkxa28weEZ5VzVHZGJMZUhidGtsWHErTnEvZllZdmUKODQ2OXRlVVZ4UUZrdWlhUUtBb3Nta2EremNuV052N0lyUG16S3MrQkpzcldqYTN2T1BSZFlJWUI1ZEVDZ1lFQQptaHk4RGR0b3kxVVV5TldXb3ozT2IyNXdyQlg2cmJWNUZBc3FYa2RzZitvMDhad2sxNE5GV3JzM2dqZTY3SzFSCm1mT0lIL1E2cGpJZEVqR2NzMzM1eU5jLzE1NzNwaTJRZWhER2EzWnBMZ1R0NERpQlN2K0hlWVVLUU94UmsxMTcKVEZIUzF1KzFtKzBsb0lCQlV3WnovM1p3MXJHcElnMjYzeVpjK1NkT1RRRUNnWUVBZ3hZbXFrNWFtamU4QVQxZwp2dlgrWklPbFJrNHJZSkJsQXdJMWUyTDFZdklwdTdxRmRaVTBYdUN4dnZsenFDRkxJVk1aZTV3NjNlUkhIMG5qClh3cTFmeTNsTi83RDFiU0NHejFDQVRaK2JkZVZpT0c1QWhLcTFId29zVzlVL0ZEWGFxVVliZ1FRQmVVZ2JMbjcKZytNQzJoNEFOOERRMkoxZGcxR00rTWg2bk9rPQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg==
+type: kubernetes.io/tls
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kuard
+spec:
+  tls:
+  - hosts:
+      - kuard.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    secretName: kuard-tls
+  rules:
+  - host: kuard.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kuard
+          servicePort: 80
+---
+apiVersion: ako.vmware.com/v1alpha1
+kind: HostRule
+metadata:
+   name: kuard
+spec:
+  virtualhost:
+    fqdn: kuard.app.{{ inventory_hostname | regex_replace('master1.','') }}
+    wafPolicy: "System-WAF-Policy"
+---
+apiVersion: ako.vmware.com/v1alpha1
+kind: HTTPRule
+metadata:
+   name: kuard.app.{{ inventory_hostname | regex_replace('master1.','') }}
+spec:
+  fqdn: kuard.app.{{ inventory_hostname | regex_replace('master1.','') }}
+  paths:
+  - target: /
+    loadBalancerPolicy:
+      algorithm: LB_ALGORITHM_CONSISTENT_HASH
+      hash: LB_ALGORITHM_CONSISTENT_HASH_SOURCE_IP_ADDRESS
