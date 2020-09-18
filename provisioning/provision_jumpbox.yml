@@ -24,10 +24,15 @@
         - ansible-runner
         - pyvmomi
         - apsw
+        - kubernetes
+        - openshift
       extra_args: --upgrade
 
   - shell: ansible-galaxy install avinetworks.avisdk avinetworks.aviconfig
     become_user: ubuntu
+  - shell: ansible-galaxy collection install community.kubernetes
+    become_user: ubuntu
+
   - file:
       name: /usr/bin/python
       state: absent

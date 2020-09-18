@@ -45,6 +45,12 @@
         - awscli
         - httpie
         - httping
+        - python3-pip
+  - pip:
+      name:
+        - openshift
+        - kubernetes
+      extra_args: --upgrade
   - get_url:
       url: https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/cfssl
       dest: /usr/local/bin/cfssl
@@ -127,9 +133,16 @@
   when: kubeadm_config.rc > 0
 
 - shell: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-- shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add stable https://kubernetes-charts.storage.googleapis.com/
-- shell: helm --kubeconfig /etc/kubernetes/admin.conf repo add ako-incubator https://avinetworks.github.io/avi-helm-charts/charts/incubator/ako
-- shell: helm --kubeconfig /etc/kubernetes/admin.conf repo update
+
+- name: Add stable chart repo
+  community.kubernetes.helm_repository:
+    name: stable
+    repo_url: "https://kubernetes-charts.storage.googleapis.com"
+
+- name: Add AKO incubator chart repo
+  community.kubernetes.helm_repository:
+    name: ako-incubator
+    repo_url: "https://avinetworks.github.io/avi-helm-charts/charts/incubator/ako"
 
 - template:
     src: "{{ item }}.j2"
@@ -142,13 +155,24 @@
     - sockshop.yaml
     - kubernetes-dashboard.yaml
     - hackazon.yaml
-    - dvwa.yaml   
+    - dvwa.yaml
     - values.yaml
 
-- shell: kubectl --kubeconfig /etc/kubernetes/admin.conf create ns avi-system
-- shell: helm --kubeconfig /etc/kubernetes/admin.conf install --devel ako/ako  --generate-name --version 1.2.1-9042-beta-2 -f /home/ubuntu/values.yaml --namespace=avi-system
+- name: Deploy AKO incubator chart with values loaded from template
+  community.kubernetes.helm:
+    name: ako
+    chart_ref: ako-incubator/ako
+    chart_version: 1.2.1-9042-beta-2
+    create_namespace: true
+    release_namespace: avi-system
+    values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
+    kubeconfig: /etc/kubernetes/admin.conf
 
-- shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf create -f /home/ubuntu/{{ item }}"
+- name: Create a Deployment by reading the definition from a local file
+  community.kubernetes.k8s:
+    state: present
+    src: "/home/ubuntu/{{ item }}"
+    namespace: default
   loop:
     - kuard.yaml
     - avinetworks.yaml

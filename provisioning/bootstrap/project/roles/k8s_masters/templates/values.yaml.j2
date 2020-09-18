@@ -9,8 +9,8 @@ image:
   pullPolicy: IfNotPresent
 
 configs:
-  controllerIP: "{{ hostvars[ inventory_hostname | regex_replace('master','controller') ]['ip_address'] }}"
-  controllerVersion: "18.2.10"
+  controllerIP: "{{ hostvars[ inventory_hostname | regex_replace('master1','controller') ]['ip_address'] }}"
+  controllerVersion: "20.1.2"
   shardVSSize: "MEDIUM"
   passthroughShardSize: "SMALL"
   fullSyncFrequency: "300"
