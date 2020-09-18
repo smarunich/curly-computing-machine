@@ -10,7 +10,7 @@ image:
 
 configs:
   controllerIP: "{{ hostvars[ inventory_hostname | regex_replace('master1','controller') ]['ip_address'] }}"
-  controllerVersion: "20.1.2"
+  controllerVersion: "{{ result['json']['version']['Version'] }}"
   shardVSSize: "MEDIUM"
   passthroughShardSize: "SMALL"
   fullSyncFrequency: "300"

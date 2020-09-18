@@ -141,8 +141,18 @@
 
 - name: Add AKO incubator chart repo
   community.kubernetes.helm_repository:
-    name: ako-incubator
-    repo_url: "https://avinetworks.github.io/avi-helm-charts/charts/incubator/ako"
+    name: ako
+    repo_url: "https://avinetworks.github.io/avi-helm-charts/charts/stable/ako"
+
+- name: "Get the controller details"
+  uri:
+    url: "https://{{ inventory_hostname | regex_replace('master1','controller') }}/api/initial-data"
+    validate_certs: no
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 600
+  delay: 10
 
 - template:
     src: "{{ item }}.j2"
@@ -161,8 +171,8 @@
 - name: Deploy AKO incubator chart with values loaded from template
   community.kubernetes.helm:
     name: ako
-    chart_ref: ako-incubator/ako
-    chart_version: 1.2.1-9042-beta-2
+    chart_ref: ako/ako
+    chart_version: 1.2.1
     create_namespace: true
     release_namespace: avi-system
     values: "{{ lookup('template', 'values.yaml.j2') | from_yaml }}"
