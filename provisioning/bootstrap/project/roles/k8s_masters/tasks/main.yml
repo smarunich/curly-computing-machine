@@ -173,6 +173,7 @@
     state: present
     src: "/home/ubuntu/{{ item }}"
     namespace: default
+    kubeconfig: /etc/kubernetes/admin.conf
   loop:
     - kuard.yaml
     - avinetworks.yaml
